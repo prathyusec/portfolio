@@ -3,1276 +3,2310 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Prathyu Prathap · pentester</title>
-  <!-- Font Awesome 6 (free) -->
+  <title>Prathyu Prathap · Ethical Hacker</title>
+  <!-- Font Awesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <!-- Google Fonts: Fira Code, Inter, Orbitron, Poppins -->
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
+    /* ============================================================
+       RESET & BASE
+    ============================================================ */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
 
+    :root {
+      --neon-green: #00ff41;
+      --neon-cyan: #00f0ff;
+      --neon-purple: #b537f2;
+      --neon-pink: #ff006e;
+      --neon-yellow: #ffbe0b;
+      --dark-bg: #050608;
+      --darker-bg: #020304;
+      --card-bg: rgba(8, 12, 18, 0.85);
+      --border-glow: rgba(0, 255, 65, 0.3);
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
-      background-color: #0a0c0f;
-      font-family: 'Fira Code', 'Inter', monospace;
-      color: #58a6ff;
-      line-height: 1.5;
+      background-color: var(--dark-bg);
+      font-family: 'Share Tech Mono', 'Fira Code', monospace;
+      color: var(--neon-green);
+      line-height: 1.6;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem 1.5rem;
-      background-image: 
-        radial-gradient(circle at 20% 30%, rgba(88, 166, 255, 0.05) 0%, transparent 25%),
-        radial-gradient(circle at 80% 70%, rgba(88, 166, 255, 0.03) 0%, transparent 30%),
-        repeating-linear-gradient(0deg, rgba(88, 166, 255, 0.02) 0px, rgba(88, 166, 255, 0.02) 1px, transparent 1px, transparent 4px);
+      overflow-x: hidden;
       position: relative;
     }
 
-    body::before {
-      content: "";
+    /* ============================================================
+       ANIMATED BACKGROUND GRID
+    ============================================================ */
+    .bg-grid {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.15) 0px, rgba(0, 0, 0, 0.15) 1px, transparent 1px, transparent 3px);
+      background-image: 
+        linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: 0;
+      animation: gridMove 20s linear infinite;
+    }
+
+    @keyframes gridMove {
+      0% { background-position: 0 0; }
+      100% { background-position: 40px 40px; }
+    }
+
+    /* ============================================================
+       SCANLINE OVERLAY
+    ============================================================ */
+    .scanlines {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15) 0px,
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 3px
+      );
       pointer-events: none;
       z-index: 999;
+      animation: scanlineFlicker 0.1s infinite;
     }
 
-    body::after {
-      content: "";
+    @keyframes scanlineFlicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.95; }
+    }
+
+    /* Moving horizontal scan bar */
+    .scan-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, transparent, var(--neon-green), transparent);
+      box-shadow: 0 0 20px var(--neon-green), 0 0 40px var(--neon-green);
+      z-index: 998;
+      animation: scanBarMove 6s linear infinite;
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    @keyframes scanBarMove {
+      0% { top: -5%; }
+      100% { top: 105%; }
+    }
+
+    /* ============================================================
+       MATRIX RAIN CANVAS
+    ============================================================ */
+    #matrixCanvas {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: radial-gradient(circle at 50% 50%, rgba(88, 166, 255, 0.03), transparent 70%);
-      pointer-events: none;
-      z-index: 998;
-    }
-
-    .main-container {
-      max-width: 1200px;
-      width: 100%;
-      background: rgba(10, 15, 20, 0.75);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1px solid #1f3a5f;
-      border-radius: 24px;
-      padding: 2.5rem 2rem;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(88, 166, 255, 0.1) inset, 0 0 30px rgba(88, 166, 255, 0.1);
-      position: relative;
-      z-index: 10;
-      transition: box-shadow 0.2s;
-    }
-
-    .main-container:hover {
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(88, 166, 255, 0.2) inset, 0 0 40px rgba(88, 166, 255, 0.15);
-    }
-
-    .terminal-bar {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 2rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid #1f3a5f;
-    }
-
-    .terminal-dots { display: flex; gap: 0.5rem; }
-    .dot { width: 12px; height: 12px; border-radius: 50%; }
-    .dot.red { background: #ff5f56; }
-    .dot.yellow { background: #ffbd2e; }
-    .dot.green { background: #27c93f; }
-
-    .prompt-text {
-      color: #58a6ff;
-      font-weight: 500;
-      font-size: 0.95rem;
-      letter-spacing: 0.5px;
-      background: #0d1117;
-      padding: 0.25rem 1rem;
-      border-radius: 30px;
-      border: 1px solid #1f3a5f;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .prompt-text i { color: #58a6ff; font-size: 0.8rem; }
-    .prompt-text span { color: #58a6ff; }
-
-    /* ===== PROFILE ===== */
-    .profile {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-    }
-
-    .avatar {
-      width: 160px;
-      height: 160px;
-      background: #0d1117;
-      border: 2px solid #58a6ff;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 35px rgba(88, 166, 255, 0.5);
-      position: relative;
-      overflow: hidden;
-      margin: 0 auto;
-      animation: avatarPulse 3s ease-in-out infinite;
-    }
-
-    @keyframes avatarPulse {
-      0%, 100% {
-        box-shadow: 0 0 25px rgba(88, 166, 255, 0.4), 0 0 0 1px rgba(88, 166, 255, 0.3) inset;
-        border-color: #58a6ff;
-      }
-      50% {
-        box-shadow: 0 0 50px rgba(88, 166, 255, 0.8), 0 0 0 1px rgba(88, 166, 255, 0.5) inset;
-        border-color: #79c0ff;
-      }
-    }
-
-    .avatar i {
-      font-size: 6.5rem;
-      color: #58a6ff;
-      text-shadow: 0 0 20px #58a6ff, 0 0 40px rgba(88, 166, 255, 0.7);
-      position: relative;
-      z-index: 2;
-      animation: dragonFloat 2.5s ease-in-out infinite, dragonGlow 1.5s ease-in-out infinite alternate;
-    }
-
-    @keyframes dragonFloat {
-      0%, 100% { transform: translateY(0px) scale(1); }
-      50% { transform: translateY(-6px) scale(1.05); }
-    }
-
-    @keyframes dragonGlow {
-      0% {
-        text-shadow: 0 0 15px #58a6ff, 0 0 30px rgba(88, 166, 255, 0.5);
-        color: #58a6ff;
-      }
-      100% {
-        text-shadow: 0 0 30px #58a6ff, 0 0 60px rgba(88, 166, 255, 0.9), 0 0 80px rgba(88, 166, 255, 0.5);
-        color: #79c0ff;
-      }
-    }
-
-    .avatar:hover i { animation-play-state: paused; transform: scale(1.1); }
-
-    .avatar::after {
-      content: "";
-      position: absolute;
-      inset: -8px;
-      border-radius: 50%;
-      border: 1px dashed #58a6ff;
-      opacity: 0.5;
-      animation: spin 8s linear infinite;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .avatar .ring-pulse {
-      position: absolute;
-      inset: 6px;
-      border-radius: 50%;
-      border: 1px solid #58a6ff;
-      opacity: 0;
-      animation: ringPulse 2s ease-out infinite;
       z-index: 1;
+      opacity: 0.15;
+      pointer-events: none;
     }
 
-    @keyframes ringPulse {
-      0% { transform: scale(0.8); opacity: 0.8; }
-      100% { transform: scale(1.3); opacity: 0; }
-    }
-
-    .profile-info {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .profile-info h1 {
-      font-family: 'Orbitron', 'Fira Code', monospace;
-      font-size: 2.6rem;
-      font-weight: 800;
-      letter-spacing: 2px;
-      color: #f0f6fc;
-      text-shadow: 0 0 10px rgba(88, 166, 255, 0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-
-    .profile-info h1 span {
-      color: #58a6ff;
-      font-weight: 400;
-      font-size: 1.8rem;
-      text-shadow: 0 0 8px #58a6ff;
-    }
-
-    .badge {
-      background: #0d1a2b;
-      color: #58a6ff;
-      padding: 0.4rem 1.2rem;
-      border-radius: 30px;
-      font-size: 0.95rem;
-      font-weight: 500;
-      border: 1px solid #58a6ff;
-      letter-spacing: 0.5px;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    /* ===== INTRO ===== */
-    .intro-section {
-      margin: 2rem 0 2.5rem;
-      padding: 1.8rem 2rem;
-      background: linear-gradient(135deg, rgba(13, 17, 23, 0.95) 0%, rgba(13, 26, 43, 0.7) 100%);
-      border: 1px solid #1f3a5f;
-      border-radius: 18px;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4), inset 0 0 30px rgba(88, 166, 255, 0.05);
-    }
-
-    .intro-section::before {
-      content: "";
-      position: absolute;
+    /* ============================================================
+       TERMINAL BOOT SCREEN
+    ============================================================ */
+    .boot-screen {
+      position: fixed;
       top: 0;
       left: 0;
-      width: 4px;
+      width: 100%;
       height: 100%;
-      background: #58a6ff;
-      opacity: 0.9;
-    }
-
-    .intro-terminal-header {
+      background: var(--darker-bg);
+      z-index: 10000;
       display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      margin-bottom: 1.2rem;
-      font-size: 0.85rem;
-      color: #8b949e;
-      letter-spacing: 0.5px;
+      flex-direction: column;
+      justify-content: center;
+      padding: 2rem;
+      font-family: 'Share Tech Mono', monospace;
+      color: var(--neon-green);
+      transition: opacity 0.8s ease, visibility 0.8s ease;
     }
 
-    .intro-terminal-header i { color: #58a6ff; font-size: 0.9rem; }
-    .intro-terminal-header .cmd { color: #58a6ff; font-weight: 600; }
-
-    .intro-text {
-      font-family: 'Poppins', 'Inter', sans-serif;
-      font-size: 1.2rem;
-      line-height: 1.9;
-      color: #c9d1d9;
-      font-weight: 300;
-      letter-spacing: 0.4px;
+    .boot-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
     }
 
-    .intro-text .name { color: #58a6ff; font-weight: 700; text-shadow: 0 0 10px rgba(88, 166, 255, 0.5); }
-    .intro-text .role { color: #f0f6fc; font-weight: 600; text-shadow: 0 0 8px rgba(88, 166, 255, 0.3); }
-    .intro-text .contact-hint { color: #79c0ff; border-bottom: 1px dashed #79c0ff; padding-bottom: 1px; font-weight: 500; }
+    .boot-line {
+      font-size: 1rem;
+      margin-bottom: 0.4rem;
+      opacity: 0;
+      animation: bootLineIn 0.3s forwards;
+      text-shadow: 0 0 5px var(--neon-green);
+    }
 
-    .cursor {
+    @keyframes bootLineIn {
+      to { opacity: 1; }
+    }
+
+    .boot-line .ok { color: var(--neon-cyan); }
+    .boot-line .warn { color: var(--neon-yellow); }
+    .boot-line .success { color: var(--neon-green); font-weight: bold; }
+
+    .boot-cursor {
       display: inline-block;
       width: 10px;
-      height: 1.1rem;
-      background: #58a6ff;
-      margin-left: 4px;
-      vertical-align: text-bottom;
-      animation: blink 1s step-end infinite;
-      box-shadow: 0 0 8px #58a6ff;
+      height: 1rem;
+      background: var(--neon-green);
+      animation: blink 0.8s step-end infinite;
+      vertical-align: middle;
     }
 
-    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
 
-    /* ===== SECTION TITLE ===== */
-    .section-title {
-      font-family: 'Orbitron', 'Fira Code', monospace;
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: #f0f6fc;
-      margin-bottom: 1.5rem;
+    /* ============================================================
+       CUSTOM CURSOR
+    ============================================================ */
+    .cursor-dot {
+      position: fixed;
+      width: 8px;
+      height: 8px;
+      background: var(--neon-green);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      box-shadow: 0 0 10px var(--neon-green), 0 0 20px var(--neon-green);
+      transition: transform 0.1s ease;
+      mix-blend-mode: difference;
+    }
+
+    .cursor-ring {
+      position: fixed;
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--neon-green);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transition: transform 0.15s ease, border-color 0.3s;
+      box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+      mix-blend-mode: difference;
+    }
+
+    .cursor-ring.hovering {
+      transform: scale(1.6);
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 25px var(--neon-cyan);
+    }
+
+    /* ============================================================
+       FLOATING HACKER TEXT
+    ============================================================ */
+    .floating-text {
+      position: fixed;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--neon-green);
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: 2;
+      animation: floatUp 15s linear infinite;
+      white-space: nowrap;
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(100vh) translateX(0);
+        opacity: 0;
+      }
+      10% { opacity: 0.15; }
+      90% { opacity: 0.15; }
+      100% {
+        transform: translateY(-100px) translateX(50px);
+        opacity: 0;
+      }
+    }
+
+    /* ============================================================
+       MAIN LAYOUT
+    ============================================================ */
+    .wrapper {
+      position: relative;
+      z-index: 10;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* ============================================================
+       TOP NAV BAR
+    ============================================================ */
+    .nav-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 1.5rem;
+      background: rgba(5, 6, 8, 0.9);
+      border: 1px solid rgba(0, 255, 65, 0.2);
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 1rem;
+      z-index: 100;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(0, 255, 65, 0.03);
+    }
+
+    .nav-logo {
       display: flex;
       align-items: center;
       gap: 0.75rem;
+      font-family: 'Orbitron', monospace;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--text-primary);
       letter-spacing: 1px;
     }
 
-    .section-title i { color: #58a6ff; font-size: 1.6rem; }
+    .nav-logo .logo-mark {
+      color: var(--neon-green);
+      font-size: 1.4rem;
+      text-shadow: 0 0 10px var(--neon-green);
+      animation: logoPulse 2s ease-in-out infinite;
+    }
 
-    .section-title::after {
-      content: "";
+    @keyframes logoPulse {
+      0%, 100% { text-shadow: 0 0 10px var(--neon-green); }
+      50% { text-shadow: 0 0 25px var(--neon-green), 0 0 40px var(--neon-green); }
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-family: 'Share Tech Mono', monospace;
+      letter-spacing: 1px;
+      transition: all 0.3s;
+      position: relative;
+      padding: 0.3rem 0;
+    }
+
+    .nav-links a::before {
+      content: '>';
+      margin-right: 0.4rem;
+      color: var(--neon-green);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: var(--neon-green);
+      text-shadow: 0 0 8px var(--neon-green);
+    }
+
+    .nav-links a:hover::before {
+      opacity: 1;
+    }
+
+    .nav-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--neon-green);
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--neon-green);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--neon-green);
+      animation: statusBlink 1.5s ease-in-out infinite;
+    }
+
+    @keyframes statusBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* ============================================================
+       HERO SECTION
+    ============================================================ */
+    .hero {
+      position: relative;
+      padding: 3rem 2rem;
+      background: var(--card-bg);
+      border: 1px solid rgba(0, 255, 65, 0.2);
+      border-radius: 20px;
+      margin-bottom: 3rem;
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        var(--neon-green) 60deg,
+        transparent 120deg,
+        transparent 240deg,
+        var(--neon-cyan) 300deg,
+        transparent 360deg
+      );
+      animation: heroRotate 8s linear infinite;
+      opacity: 0.08;
+      z-index: 0;
+    }
+
+    @keyframes heroRotate {
+      100% { transform: rotate(360deg); }
+    }
+
+    .hero > * {
+      position: relative;
+      z-index: 2;
+    }
+
+    /* ============================================================
+       GLITCH AVATAR
+    ============================================================ */
+    .avatar-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .glitch-avatar {
+      width: 170px;
+      height: 170px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 20, 10, 0.8);
+      border: 2px solid var(--neon-green);
+      border-radius: 50%;
+      box-shadow: 
+        0 0 30px rgba(0, 255, 65, 0.5),
+        inset 0 0 30px rgba(0, 255, 65, 0.1);
+      animation: avatarFloat 4s ease-in-out infinite;
+    }
+
+    @keyframes avatarFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .glitch-avatar::before,
+    .glitch-avatar::after {
+      content: '';
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+      border: 1px solid var(--neon-green);
+      animation: rippleRing 3s ease-out infinite;
+    }
+
+    .glitch-avatar::after {
+      animation-delay: 1.5s;
+    }
+
+    @keyframes rippleRing {
+      0% {
+        transform: scale(0.9);
+        opacity: 0.8;
+      }
+      100% {
+        transform: scale(1.4);
+        opacity: 0;
+      }
+    }
+
+    .glitch-avatar .dragon-icon {
+      font-size: 6.5rem;
+      color: var(--neon-green);
+      text-shadow: 
+        0 0 15px var(--neon-green),
+        0 0 30px var(--neon-green),
+        0 0 60px rgba(0, 255, 65, 0.5);
+      animation: dragonGlitch 3s infinite;
+      position: relative;
+      z-index: 3;
+    }
+
+    @keyframes dragonGlitch {
+      0%, 100% {
+        transform: translate(0, 0) scale(1);
+        text-shadow: 0 0 15px var(--neon-green), 0 0 30px var(--neon-green);
+      }
+      20% {
+        transform: translate(-2px, 1px) scale(1.02);
+        text-shadow: -2px 0 var(--neon-cyan), 2px 0 var(--neon-pink), 0 0 30px var(--neon-green);
+      }
+      40% {
+        transform: translate(2px, -1px) scale(1);
+        text-shadow: 2px 0 var(--neon-cyan), -2px 0 var(--neon-pink), 0 0 30px var(--neon-green);
+      }
+      60% {
+        transform: translate(-1px, -2px) scale(1.01);
+        text-shadow: -1px 0 var(--neon-cyan), 1px 0 var(--neon-pink), 0 0 40px var(--neon-green);
+      }
+      80% {
+        transform: translate(1px, 2px) scale(1);
+        text-shadow: 1px 0 var(--neon-cyan), -1px 0 var(--neon-pink), 0 0 30px var(--neon-green);
+      }
+    }
+
+    /* Orbiting dots around avatar */
+    .orbit {
+      position: absolute;
+      inset: 0;
+      animation: orbitSpin 6s linear infinite;
+      pointer-events: none;
+    }
+
+    .orbit::before {
+      content: '';
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      width: 10px;
+      height: 10px;
+      background: var(--neon-cyan);
+      border-radius: 50%;
+      box-shadow: 0 0 15px var(--neon-cyan);
+      transform: translateX(-50%);
+    }
+
+    @keyframes orbitSpin {
+      100% { transform: rotate(360deg); }
+    }
+
+    /* ============================================================
+       HERO TEXT
+    ============================================================ */
+    .hero-name {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 900;
+      letter-spacing: 3px;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+      position: relative;
+      display: inline-block;
+    }
+
+    .hero-name .glitch-text {
+      position: relative;
+      display: inline-block;
+      color: var(--text-primary);
+      animation: glitchMain 4s infinite;
+    }
+
+    @keyframes glitchMain {
+      0%, 90%, 100% { transform: translate(0); }
+      92% { transform: translate(-3px, 1px); }
+      94% { transform: translate(3px, -1px); }
+      96% { transform: translate(-2px, -1px); }
+      98% { transform: translate(2px, 1px); }
+    }
+
+    .hero-tagline {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1rem;
+      color: var(--text-secondary);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .hero-roles {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .role-chip {
+      padding: 0.5rem 1.2rem;
+      background: rgba(0, 255, 65, 0.05);
+      border: 1px solid rgba(0, 255, 65, 0.4);
+      border-radius: 30px;
+      font-size: 0.8rem;
+      font-family: 'Share Tech Mono', monospace;
+      color: var(--neon-green);
+      letter-spacing: 1px;
+      transition: all 0.3s;
+      cursor: default;
+    }
+
+    .role-chip:hover {
+      background: rgba(0, 255, 65, 0.15);
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .role-chip i {
+      margin-right: 0.4rem;
+    }
+
+    /* ============================================================
+       TYPEWRITER TERMINAL
+    ============================================================ */
+    .terminal-window {
+      max-width: 800px;
+      margin: 0 auto;
+      background: rgba(2, 3, 4, 0.95);
+      border: 1px solid rgba(0, 255, 65, 0.3);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 255, 65, 0.1);
+      text-align: left;
+    }
+
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1rem;
+      background: rgba(0, 255, 65, 0.05);
+      border-bottom: 1px solid rgba(0, 255, 65, 0.15);
+    }
+
+    .terminal-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .terminal-dot.red { background: #ff5f56; }
+    .terminal-dot.yellow { background: #ffbd2e; }
+    .terminal-dot.green { background: #27c93f; }
+
+    .terminal-title {
+      margin-left: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      font-family: 'Share Tech Mono', monospace;
+      letter-spacing: 1px;
+    }
+
+    .terminal-body {
+      padding: 1.2rem 1.4rem;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--neon-green);
+      line-height: 1.9;
+      min-height: 200px;
+    }
+
+    .terminal-body .line {
+      display: block;
+      opacity: 0;
+      animation: typeLine 0.4s forwards;
+    }
+
+    @keyframes typeLine {
+      to { opacity: 1; }
+    }
+
+    .terminal-body .prompt {
+      color: var(--neon-cyan);
+    }
+
+    .terminal-body .cmd {
+      color: var(--text-primary);
+    }
+
+    .terminal-body .output {
+      color: var(--text-secondary);
+      padding-left: 1rem;
+    }
+
+    .terminal-body .highlight-green { color: var(--neon-green); }
+    .terminal-body .highlight-cyan { color: var(--neon-cyan); }
+    .terminal-body .highlight-yellow { color: var(--neon-yellow); }
+    .terminal-body .highlight-pink { color: var(--neon-pink); }
+
+    /* ============================================================
+       SECTION BASE
+    ============================================================ */
+    .section {
+      margin-bottom: 3.5rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    .section-header h2 {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .section-header h2 .accent {
+      color: var(--neon-green);
+    }
+
+    .section-header .line {
       flex: 1;
       height: 1px;
-      background: linear-gradient(90deg, #58a6ff, transparent);
-      margin-left: 1rem;
-    }
-
-    /* ===== CERTIFICATIONS ===== */
-    .cert-section {
-      margin-bottom: 2rem;
-      padding: 1.8rem 1.8rem;
-      background: linear-gradient(135deg, rgba(13, 17, 23, 0.95) 0%, rgba(13, 26, 43, 0.7) 100%);
-      border: 1px solid #1f3a5f;
-      border-radius: 18px;
+      background: linear-gradient(90deg, var(--neon-green), transparent);
       position: relative;
-      overflow: hidden;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4), inset 0 0 30px rgba(88, 166, 255, 0.05);
     }
 
-    .cert-section::before {
-      content: "";
+    .section-header .line::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: -2px;
+      width: 5px;
+      height: 5px;
+      background: var(--neon-green);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--neon-green);
+    }
+
+    /* ============================================================
+       CERTIFICATIONS
+    ============================================================ */
+    .cert-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .cert-card {
+      position: relative;
+      padding: 1.5rem;
+      background: var(--card-bg);
+      border: 1px solid rgba(0, 255, 65, 0.15);
+      border-radius: 14px;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: default;
+    }
+
+    .cert-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.08), transparent);
+      transition: left 0.6s;
+    }
+
+    .cert-card:hover::before {
+      left: 100%;
+    }
+
+    .cert-card:hover {
+      border-color: var(--neon-green);
+      transform: translateY(-6px);
+      box-shadow: 
+        0 15px 40px rgba(0, 0, 0, 0.6),
+        0 0 30px rgba(0, 255, 65, 0.2);
+    }
+
+    .cert-card .corner {
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      border-color: var(--neon-green);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .cert-card:hover .corner { opacity: 1; }
+
+    .corner.tl { top: 6px; left: 6px; border-top: 2px solid; border-left: 2px solid; }
+    .corner.tr { top: 6px; right: 6px; border-top: 2px solid; border-right: 2px solid; }
+    .corner.bl { bottom: 6px; left: 6px; border-bottom: 2px solid; border-left: 2px solid; }
+    .corner.br { bottom: 6px; right: 6px; border-bottom: 2px solid; border-right: 2px solid; }
+
+    .cert-icon-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 55px;
+      height: 55px;
+      border-radius: 12px;
+      background: rgba(0, 255, 65, 0.05);
+      border: 1px solid rgba(0, 255, 65, 0.3);
+      margin-bottom: 1rem;
+      font-size: 1.6rem;
+      color: var(--neon-green);
+      transition: all 0.3s;
+    }
+
+    .cert-card:hover .cert-icon-wrap {
+      background: rgba(0, 255, 65, 0.15);
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.4);
+      transform: rotate(-5deg) scale(1.05);
+    }
+
+    .cert-card h3 {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: 1px;
+      margin-bottom: 0.3rem;
+    }
+
+    .cert-card .org {
+      font-size: 0.8rem;
+      color: var(--neon-cyan);
+      font-family: 'Share Tech Mono', monospace;
+      letter-spacing: 1px;
+      margin-bottom: 0.7rem;
+    }
+
+    .cert-card .desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .cert-card .meta {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--neon-green);
+      padding-top: 0.8rem;
+      border-top: 1px dashed rgba(0, 255, 65, 0.2);
+    }
+
+    /* ============================================================
+       QUOTES TERMINAL
+    ============================================================ */
+    .quotes-terminal {
+      max-width: 900px;
+      margin: 0 auto;
+      background: rgba(2, 3, 4, 0.9);
+      border: 1px solid rgba(0, 255, 65, 0.25);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+      position: relative;
+    }
+
+    .quotes-terminal::before {
+      content: '';
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
-      height: 3px;
-      background: linear-gradient(90deg, #58a6ff, transparent, #58a6ff);
-      animation: scanLine 4s linear infinite;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--neon-green), transparent);
+      animation: scanHorizontal 3s linear infinite;
     }
 
-    @keyframes scanLine {
+    @keyframes scanHorizontal {
       0% { transform: translateX(-100%); }
       100% { transform: translateX(100%); }
     }
 
-    .cert-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1rem;
-    }
-
-    .cert-card {
-      background: #0d1117;
-      border: 1px solid #1f3a5f;
-      border-radius: 16px;
-      padding: 1.5rem 1.3rem;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
+    .quotes-header {
       display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.7rem 1.2rem;
+      background: rgba(0, 255, 65, 0.05);
+      border-bottom: 1px solid rgba(0, 255, 65, 0.15);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
     }
 
-    .cert-card::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 4px;
-      height: 100%;
-      background: #58a6ff;
-      opacity: 0.8;
-      transition: width 0.3s ease;
-    }
-
-    .cert-card:hover::before { width: 6px; box-shadow: 0 0 20px #58a6ff; }
-
-    .cert-card:hover {
-      border-color: #58a6ff;
-      box-shadow: 0 0 25px rgba(88, 166, 255, 0.25);
-      transform: translateY(-5px);
-    }
-
-    .cert-icon { font-size: 1.8rem; color: #58a6ff; text-shadow: 0 0 12px rgba(88, 166, 255, 0.6); margin-bottom: 0.2rem; }
-
-    .cert-card h4 {
-      font-family: 'Orbitron', 'Fira Code', monospace;
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: #f0f6fc;
-      letter-spacing: 0.5px;
-      margin-bottom: 0.1rem;
-    }
-
-    .cert-card .cert-org { font-size: 0.85rem; color: #58a6ff; font-weight: 500; letter-spacing: 0.3px; }
-
-    .cert-card .cert-desc {
-      font-family: 'Poppins', 'Inter', sans-serif;
-      font-size: 0.85rem;
-      color: #8b949e;
-      line-height: 1.6;
-      font-weight: 300;
-      margin-top: 0.3rem;
-    }
-
-    .cert-card .cert-meta {
+    .quotes-header .prompt-line {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      margin-top: auto;
-      padding-top: 0.6rem;
-      font-size: 0.75rem;
-      color: #79c0ff;
-      letter-spacing: 0.5px;
     }
 
-    .cert-card .cert-meta i { color: #58a6ff; font-size: 0.8rem; }
+    .quotes-header .prompt-line .ps1 {
+      color: var(--neon-green);
+    }
 
-    /* ===== QUOTES SECTION ===== */
-    .quotes-section {
+    .quotes-header .prompt-line .cmd {
+      color: var(--text-primary);
+    }
+
+    .quotes-body {
+      padding: 2rem 1.5rem;
+      text-align: center;
+      min-height: 160px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 3rem;
-      padding: 1.5rem 1rem;
-      background: linear-gradient(135deg, rgba(13, 17, 23, 0.9) 0%, rgba(13, 26, 43, 0.6) 100%);
-      border: 1px solid #1f3a5f;
-      border-radius: 18px;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4), inset 0 0 30px rgba(88, 166, 255, 0.05);
-    }
-
-    .quotes-section::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 3px;
-      background: linear-gradient(90deg, transparent, #58a6ff, transparent);
-      animation: scanLine 3s linear infinite;
-    }
-
-    .quote-icon {
-      font-size: 1.8rem;
-      color: #58a6ff;
-      opacity: 0.6;
-      margin-bottom: 0.25rem;
-      text-shadow: 0 0 15px rgba(88, 166, 255, 0.5);
+      justify-content: center;
+      gap: 1rem;
     }
 
     #quoteText {
-      font-size: 1.3rem;
-      font-weight: 500;
-      color: #f0f6fc;
-      text-align: center;
-      letter-spacing: 0.5px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+      color: var(--text-primary);
       line-height: 1.6;
-      transition: opacity 0.5s ease;
-      min-height: 2.2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      letter-spacing: 1px;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      min-height: 2rem;
     }
 
     #quoteText .highlight {
-      color: #58a6ff;
-      text-shadow: 0 0 10px rgba(88, 166, 255, 0.6);
-      font-weight: 600;
+      color: var(--neon-green);
+      text-shadow: 0 0 10px rgba(0, 255, 65, 0.6);
     }
 
-    .quote-author {
-      font-size: 0.9rem;
-      color: #8b949e;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      font-weight: 500;
-      transition: opacity 0.5s ease;
+    #quoteAuthor {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--neon-cyan);
+      letter-spacing: 2px;
+      transition: opacity 0.4s ease;
+    }
+
+    #quoteAuthor::before {
+      content: '// ';
+      color: var(--neon-green);
+    }
+
+    .quote-dots {
       display: flex;
-      align-items: center;
-      gap: 0.5rem;
+      justify-content: center;
+      gap: 0.6rem;
+      padding: 0 0 1.5rem;
     }
-
-    .quote-author::before { content: "—"; color: #58a6ff; }
-
-    .quote-dots { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
 
     .quote-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #1f3a5f;
-      transition: all 0.3s;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      background: rgba(0, 255, 65, 0.2);
+      border: 1px solid rgba(0, 255, 65, 0.4);
       cursor: pointer;
+      transition: all 0.3s;
+      transform: rotate(45deg);
     }
 
     .quote-dot.active {
-      background: #58a6ff;
-      box-shadow: 0 0 10px #58a6ff;
-      transform: scale(1.3);
+      background: var(--neon-green);
+      box-shadow: 0 0 12px var(--neon-green);
+      transform: rotate(45deg) scale(1.2);
     }
 
-    /* ===== ACHIEVEMENTS SECTION ===== */
-    .achievements-section {
-      margin-bottom: 3rem;
-      padding: 1.8rem 1.8rem;
-      background: linear-gradient(135deg, rgba(13, 17, 23, 0.95) 0%, rgba(13, 26, 43, 0.7) 100%);
-      border: 1px solid #1f3a5f;
-      border-radius: 18px;
+    .quote-dot:hover {
+      background: rgba(0, 255, 65, 0.5);
+    }
+
+    /* ============================================================
+       ACHIEVEMENTS
+    ============================================================ */
+    .achievements-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .achievement {
+      display: flex;
+      gap: 1.5rem;
+      padding: 1.5rem;
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 190, 11, 0.15);
+      border-left: 4px solid var(--neon-yellow);
+      border-radius: 12px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
       overflow: hidden;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4), inset 0 0 30px rgba(88, 166, 255, 0.05);
     }
 
-    .achievements-section::before {
-      content: "";
+    .achievement::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, rgba(255, 190, 11, 0.08), transparent);
+      transition: width 0.5s;
+    }
+
+    .achievement:hover::before {
+      width: 100%;
+    }
+
+    .achievement:hover {
+      border-color: var(--neon-yellow);
+      transform: translateX(8px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 190, 11, 0.15);
+    }
+
+    .ach-icon {
+      flex-shrink: 0;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 190, 11, 0.08);
+      border: 1px solid rgba(255, 190, 11, 0.4);
+      border-radius: 12px;
+      font-size: 1.6rem;
+      color: var(--neon-yellow);
+      transition: all 0.3s;
+      position: relative;
+      z-index: 2;
+    }
+
+    .achievement:hover .ach-icon {
+      transform: scale(1.1) rotate(-5deg);
+      box-shadow: 0 0 25px rgba(255, 190, 11, 0.5);
+    }
+
+    .ach-body {
+      flex: 1;
+      position: relative;
+      z-index: 2;
+    }
+
+    .ach-body h4 {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: 0.5px;
+      margin-bottom: 0.4rem;
+    }
+
+    .ach-body p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 0.6rem;
+    }
+
+    .ach-tag {
+      display: inline-block;
+      padding: 0.25rem 0.8rem;
+      background: rgba(255, 190, 11, 0.1);
+      border: 1px solid rgba(255, 190, 11, 0.4);
+      border-radius: 4px;
+      font-size: 0.7rem;
+      color: var(--neon-yellow);
+      letter-spacing: 1px;
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    /* ============================================================
+       STATS COUNTER
+    ============================================================ */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .stat-box {
+      text-align: center;
+      padding: 2rem 1rem;
+      background: var(--card-bg);
+      border: 1px solid rgba(0, 255, 65, 0.15);
+      border-radius: 14px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+
+    .stat-box::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 2px;
+      background: var(--neon-green);
+      transition: width 0.4s;
+    }
+
+    .stat-box:hover::after {
+      width: 80%;
+      box-shadow: 0 0 15px var(--neon-green);
+    }
+
+    .stat-box:hover {
+      border-color: var(--neon-green);
+      transform: translateY(-5px);
+    }
+
+    .stat-box i {
+      font-size: 1.8rem;
+      color: var(--neon-green);
+      margin-bottom: 0.8rem;
+      text-shadow: 0 0 15px rgba(0, 255, 65, 0.6);
+    }
+
+    .stat-num {
+      font-family: 'Orbitron', monospace;
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: -1px;
+      line-height: 1;
+      margin-bottom: 0.4rem;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    /* ============================================================
+       SKILLS
+    ============================================================ */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .skill-item {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 1rem 1.2rem;
+      background: var(--card-bg);
+      border: 1px solid rgba(0, 255, 65, 0.15);
+      border-radius: 10px;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .skill-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 3px;
+      height: 100%;
+      background: var(--neon-green);
+      transform: scaleY(0);
+      transition: transform 0.3s;
+    }
+
+    .skill-item:hover::before {
+      transform: scaleY(1);
+    }
+
+    .skill-item:hover {
+      border-color: var(--neon-green);
+      background: rgba(0, 255, 65, 0.05);
+      transform: translateX(5px);
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.15);
+    }
+
+    .skill-item i {
+      color: var(--neon-green);
+      font-size: 1.2rem;
+      transition: transform 0.3s;
+    }
+
+    .skill-item:hover i {
+      transform: scale(1.2) rotate(5deg);
+    }
+
+    .skill-item span {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      letter-spacing: 0.5px;
+    }
+
+    /* ============================================================
+       PROJECTS
+    ============================================================ */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.8rem;
+    }
+
+    .project-card {
+      position: relative;
+      padding: 2rem 1.6rem;
+      background: var(--card-bg);
+      border: 1px solid rgba(0, 255, 65, 0.15);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .project-card::before {
+      content: '';
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 3px;
-      background: linear-gradient(90deg, transparent, #ffd700, transparent);
-      animation: scanLine 5s linear infinite;
+      background: linear-gradient(90deg, var(--neon-green), var(--neon-cyan), var(--neon-purple));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.5s;
     }
 
-    .achievements-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-
-    .achievement-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 1.2rem;
-      padding: 1.2rem 1.3rem;
-      background: #0d1117;
-      border: 1px solid #1f3a5f;
-      border-radius: 14px;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .achievement-item::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 3px;
-      height: 100%;
-      background: #ffd700;
-      opacity: 0.9;
-      transition: width 0.3s ease;
-    }
-
-    .achievement-item:hover::before { width: 5px; box-shadow: 0 0 20px #ffd700; }
-
-    .achievement-item:hover {
-      border-color: #ffd700;
-      box-shadow: 0 0 25px rgba(255, 215, 0, 0.2);
-      transform: translateX(5px);
-    }
-
-    .achievement-icon {
-      flex-shrink: 0;
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background: rgba(255, 215, 0, 0.1);
-      border: 1px solid rgba(255, 215, 0, 0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.4rem;
-      color: #ffd700;
-      text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
-    }
-
-    .achievement-content { flex: 1; }
-
-    .achievement-content h4 {
-      font-family: 'Orbitron', 'Fira Code', monospace;
-      font-size: 1rem;
-      font-weight: 700;
-      color: #f0f6fc;
-      letter-spacing: 0.5px;
-      margin-bottom: 0.3rem;
-    }
-
-    .achievement-content p {
-      font-family: 'Poppins', 'Inter', sans-serif;
-      font-size: 0.9rem;
-      color: #8b949e;
-      line-height: 1.6;
-      font-weight: 300;
-    }
-
-    .achievement-content .achievement-tag {
-      display: inline-block;
-      margin-top: 0.5rem;
-      font-size: 0.7rem;
-      font-weight: 600;
-      padding: 0.2rem 0.7rem;
-      border-radius: 20px;
-      background: rgba(255, 215, 0, 0.1);
-      color: #ffd700;
-      border: 1px solid rgba(255, 215, 0, 0.4);
-      letter-spacing: 0.5px;
-    }
-
-    /* ===== STATS ===== */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 3rem;
-    }
-
-    .stat-card {
-      background: #0d1117;
-      border: 1px solid #1f3a5f;
-      border-radius: 16px;
-      padding: 1.5rem 1rem;
-      text-align: center;
-      transition: all 0.2s;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-      border-top: 3px solid #58a6ff;
-    }
-
-    .stat-card i {
-      font-size: 2rem;
-      color: #58a6ff;
-      margin-bottom: 0.75rem;
-      text-shadow: 0 0 10px rgba(88, 166, 255, 0.5);
-    }
-
-    .stat-card h3 {
-      font-family: 'Orbitron', 'Fira Code', monospace;
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: #f0f6fc;
-      letter-spacing: -0.5px;
-    }
-
-    .stat-card p {
-      color: #8b949e;
-      font-size: 0.9rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      font-weight: 500;
-    }
-
-    .stat-card:hover {
-      border-color: #58a6ff;
-      box-shadow: 0 0 20px rgba(88, 166, 255, 0.2);
-      transform: translateY(-3px);
-    }
-
-    /* ===== SKILLS ===== */
-    .skills-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      margin-bottom: 3rem;
-    }
-
-    .skill-tag {
-      background: #0d1117;
-      border: 1px solid #1f3a5f;
-      border-radius: 40px;
-      padding: 0.6rem 1.5rem;
-      font-size: 1rem;
-      font-weight: 500;
-      color: #58a6ff;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      transition: all 0.2s;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-    }
-
-    .skill-tag i { color: #58a6ff; font-size: 1rem; }
-
-    .skill-tag:hover {
-      border-color: #58a6ff;
-      background: #111f2f;
-      color: #ffffff;
-      box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
-      transform: scale(1.02);
-    }
-
-    /* ===== PROJECTS ===== */
-    .projects-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.8rem;
-      margin-bottom: 3rem;
-    }
-
-    .project-card {
-      background: #0d1117;
-      border: 1px solid #1f3a5f;
-      border-radius: 18px;
-      padding: 1.8rem 1.5rem;
-      transition: all 0.2s;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .project-card::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 4px;
-      height: 100%;
-      background: #58a6ff;
-      opacity: 0.8;
-    }
-
-    .project-card i { font-size: 2rem; color: #58a6ff; margin-bottom: 1rem; display: block; }
-
-    .project-card h3 {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: #f0f6fc;
-      margin-bottom: 0.5rem;
-    }
-
-    .project-card p { color: #8b949e; font-size: 0.95rem; margin-bottom: 1rem; }
-
-    .project-card .tag {
-      display: inline-block;
-      background: #0d1a2b;
-      color: #58a6ff;
-      font-size: 0.75rem;
-      padding: 0.25rem 1rem;
-      border-radius: 20px;
-      font-weight: 500;
-      letter-spacing: 0.5px;
+    .project-card:hover::before {
+      transform: scaleX(1);
     }
 
     .project-card:hover {
-      border-color: #58a6ff;
-      box-shadow: 0 0 25px rgba(88, 166, 255, 0.15);
-      transform: translateY(-5px);
+      border-color: var(--neon-green);
+      transform: translateY(-8px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 255, 65, 0.15);
     }
 
-    /* ===== CONTACT ===== */
-    .contact-section {
-      border-top: 1px solid #1f3a5f;
-      padding-top: 2rem;
-      margin-top: 1rem;
-    }
-
-    .contact-grid {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .contact-item {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      font-size: 1.1rem;
-      color: #58a6ff;
-    }
-
-    .contact-item i { color: #58a6ff; font-size: 1.4rem; width: 30px; text-align: center; }
-
-    .contact-item a {
-      color: #58a6ff;
-      text-decoration: none;
-      border-bottom: 1px dashed #58a6ff;
-      transition: color 0.2s;
-    }
-
-    .contact-item a:hover { color: #79c0ff; }
-
-    /* ===== ICON-ONLY SOCIAL BUTTONS ===== */
-    .messaging-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1.2rem;
-      margin: 1.5rem 0 1rem;
-      justify-content: flex-start;
-      align-items: center;
-    }
-
-    .msg-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      font-size: 1.6rem;
-      text-decoration: none;
-      transition: all 0.25s ease;
-      border: 1px solid transparent;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-      position: relative;
-    }
-
-    .msg-btn i { transition: transform 0.2s; }
-    .msg-btn:hover i { transform: scale(1.2); }
-
-    .msg-btn::after {
-      content: attr(data-label);
+    .project-num {
       position: absolute;
-      bottom: -35px;
-      left: 50%;
-      transform: translateX(-50%) translateY(10px);
-      background: #0d1117;
-      color: #58a6ff;
-      font-size: 0.75rem;
-      font-weight: 600;
+      top: 1rem;
+      right: 1.2rem;
+      font-family: 'Orbitron', monospace;
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: rgba(0, 255, 65, 0.08);
+      line-height: 1;
+    }
+
+    .project-icon {
+      font-size: 2rem;
+      color: var(--neon-green);
+      margin-bottom: 1rem;
+      display: inline-block;
+      transition: transform 0.3s;
+    }
+
+    .project-card:hover .project-icon {
+      transform: scale(1.15) rotate(-5deg);
+      text-shadow: 0 0 20px var(--neon-green);
+    }
+
+    .project-card h3 {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: 1px;
+      margin-bottom: 0.7rem;
+    }
+
+    .project-card p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 1.2rem;
+    }
+
+    .project-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .project-tag {
       padding: 0.3rem 0.8rem;
+      background: rgba(0, 240, 255, 0.05);
+      border: 1px solid rgba(0, 240, 255, 0.3);
       border-radius: 20px;
-      border: 1px solid #1f3a5f;
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.25s ease;
-      font-family: 'Fira Code', monospace;
+      font-size: 0.7rem;
+      color: var(--neon-cyan);
+      font-family: 'Share Tech Mono', monospace;
       letter-spacing: 0.5px;
     }
 
-    .msg-btn:hover::after { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-    .whatsapp-btn { background: #0d1117; border: 1px solid #25D366; color: #25D366; }
-    .whatsapp-btn i { color: #25D366; }
-    .whatsapp-btn:hover {
-      background: #25D366;
-      color: #0a0c0f;
-      border-color: #25D366;
-      box-shadow: 0 0 25px rgba(37, 211, 102, 0.6);
-      transform: translateY(-5px) scale(1.05);
+    /* ============================================================
+       CONTACT SECTION
+    ============================================================ */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
     }
-    .whatsapp-btn:hover i { color: #0a0c0f; }
 
-    .telegram-btn { background: #0d1117; border: 1px solid #26A5E4; color: #26A5E4; }
-    .telegram-btn i { color: #26A5E4; }
-    .telegram-btn:hover {
-      background: #26A5E4;
-      color: #0a0c0f;
-      border-color: #26A5E4;
-      box-shadow: 0 0 25px rgba(38, 165, 228, 0.6);
-      transform: translateY(-5px) scale(1.05);
-    }
-    .telegram-btn:hover i { color: #0a0c0f; }
-
-    .tryhackme-btn { background: #0d1117; border: 1px solid #ff3e3e; color: #ff3e3e; }
-    .tryhackme-btn i { color: #ff3e3e; }
-    .tryhackme-btn:hover {
-      background: #ff3e3e;
-      color: #0a0c0f;
-      border-color: #ff3e3e;
-      box-shadow: 0 0 25px rgba(255, 62, 62, 0.6);
-      transform: translateY(-5px) scale(1.05);
-    }
-    .tryhackme-btn:hover i { color: #0a0c0f; }
-
-    .contact-footer {
+    .contact-card {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
       align-items: center;
       gap: 1rem;
-      margin-top: 1.5rem;
-      padding-top: 1.2rem;
-      border-top: 1px solid #1f3a5f;
+      padding: 1.4rem 1.5rem;
+      background: var(--card-bg);
+      border: 1px solid rgba(0, 255, 65, 0.15);
+      border-radius: 14px;
+      transition: all 0.3s;
+      text-decoration: none;
     }
 
-    .copyright { color: #6e7681; font-size: 0.85rem; letter-spacing: 0.5px; }
-    .copyright i { color: #58a6ff; margin-right: 0.25rem; }
+    .contact-card:hover {
+      border-color: var(--neon-green);
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 25px rgba(0, 255, 65, 0.15);
+    }
 
-    .pgp { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: #8b949e; }
-    .pgp i { color: #58a6ff; }
+    .contact-icon {
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+      transition: all 0.3s;
+    }
 
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 650px) {
-      .main-container { padding: 1.8rem 1.2rem; }
-      .profile-info h1 { font-size: 1.9rem; }
-      .avatar { width: 130px; height: 130px; }
-      .avatar i { font-size: 5.2rem; }
-      .intro-section { padding: 1.4rem 1.4rem; }
-      .intro-text { font-size: 1.05rem; line-height: 1.8; }
-      .cert-grid { grid-template-columns: 1fr; }
-      .achievement-item { flex-direction: row; }
-      #quoteText { font-size: 1.1rem; }
-      .contact-grid { flex-direction: column; align-items: flex-start; }
-      .stats-grid { grid-template-columns: 1fr 1fr; }
-      .messaging-row { justify-content: center; }
-      .contact-footer { flex-direction: column; text-align: center; }
-      .msg-btn::after { display: none; }
+    .contact-card:hover .contact-icon {
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    .contact-icon.green { background: rgba(0, 255, 65, 0.1); color: var(--neon-green); border: 1px solid rgba(0, 255, 65, 0.4); }
+    .contact-icon.cyan { background: rgba(0, 240, 255, 0.1); color: var(--neon-cyan); border: 1px solid rgba(0, 240, 255, 0.4); }
+    .contact-icon.yellow { background: rgba(255, 190, 11, 0.1); color: var(--neon-yellow); border: 1px solid rgba(255, 190, 11, 0.4); }
+
+    .contact-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .contact-info .label {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 0.2rem;
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    .contact-info .value {
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      font-family: 'Share Tech Mono', monospace;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Social buttons */
+    .socials {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 2rem;
+      justify-content: center;
+    }
+
+    .social-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.9rem 1.6rem;
+      background: rgba(5, 6, 8, 0.8);
+      border: 1px solid rgba(0, 255, 65, 0.3);
+      border-radius: 10px;
+      text-decoration: none;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--text-primary);
+      letter-spacing: 1px;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .social-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .social-btn:hover::before {
+      left: 100%;
+    }
+
+    .social-btn i {
+      font-size: 1.2rem;
+    }
+
+    .social-btn.whatsapp { border-color: rgba(37, 211, 102, 0.5); }
+    .social-btn.whatsapp i { color: #25D366; }
+    .social-btn.whatsapp:hover {
+      background: rgba(37, 211, 102, 0.15);
+      border-color: #25D366;
+      box-shadow: 0 0 25px rgba(37, 211, 102, 0.4);
+      transform: translateY(-4px);
+    }
+
+    .social-btn.telegram { border-color: rgba(38, 165, 228, 0.5); }
+    .social-btn.telegram i { color: #26A5E4; }
+    .social-btn.telegram:hover {
+      background: rgba(38, 165, 228, 0.15);
+      border-color: #26A5E4;
+      box-shadow: 0 0 25px rgba(38, 165, 228, 0.4);
+      transform: translateY(-4px);
+    }
+
+    .social-btn.tryhackme { border-color: rgba(255, 62, 62, 0.5); }
+    .social-btn.tryhackme i { color: #ff3e3e; }
+    .social-btn.tryhackme:hover {
+      background: rgba(255, 62, 62, 0.15);
+      border-color: #ff3e3e;
+      box-shadow: 0 0 25px rgba(255, 62, 62, 0.4);
+      transform: translateY(-4px);
+    }
+
+    .social-btn.github { border-color: rgba(255, 255, 255, 0.3); }
+    .social-btn.github i { color: #ffffff; }
+    .social-btn.github:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: #ffffff;
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
+      transform: translateY(-4px);
+    }
+
+    /* ============================================================
+       FOOTER
+    ============================================================ */
+    .footer {
+      text-align: center;
+      padding: 2rem 1rem 1rem;
+      border-top: 1px solid rgba(0, 255, 65, 0.1);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      letter-spacing: 1px;
+    }
+
+    .footer .ascii {
+      color: var(--neon-green);
+      font-size: 0.7rem;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      opacity: 0.6;
+      white-space: pre;
+      overflow: hidden;
+      display: inline-block;
+    }
+
+    .footer .copy {
+      margin-top: 0.5rem;
+    }
+
+    .footer .copy i {
+      color: var(--neon-green);
+      margin: 0 0.3rem;
+    }
+
+    /* ============================================================
+       BACK TO TOP
+    ============================================================ */
+    .back-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 255, 65, 0.1);
+      border: 1px solid var(--neon-green);
+      border-radius: 50%;
+      color: var(--neon-green);
+      font-size: 1.2rem;
+      cursor: pointer;
+      z-index: 500;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+    }
+
+    .back-top.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .back-top:hover {
+      background: var(--neon-green);
+      color: var(--dark-bg);
+      box-shadow: 0 0 30px var(--neon-green);
+      transform: translateY(-5px);
+    }
+
+    /* ============================================================
+       SCROLL REVEAL
+    ============================================================ */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ============================================================
+       TYPING ANIMATION
+    ============================================================ */
+    .typing-cursor {
+      display: inline-block;
+      width: 8px;
+      height: 1.1em;
+      background: var(--neon-green);
+      margin-left: 3px;
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+      box-shadow: 0 0 10px var(--neon-green);
+    }
+
+    /* ============================================================
+       RESPONSIVE
+    ============================================================ */
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+    }
+
+    @media (max-width: 768px) {
+      .wrapper { padding: 1rem; }
+      .nav-bar { padding: 0.7rem 1rem; }
+      .hero { padding: 2rem 1.2rem; }
+      .section-header h2 { font-size: 1.2rem; }
+      .achievement { flex-direction: column; }
+      .ach-icon { width: 50px; height: 50px; font-size: 1.3rem; }
+      .cursor-dot, .cursor-ring { display: none; }
     }
 
     @media (max-width: 480px) {
-      .stats-grid { grid-template-columns: 1fr; }
-      .profile-info h1 { font-size: 1.6rem; }
-      .avatar { width: 110px; height: 110px; }
-      .avatar i { font-size: 4.4rem; }
-      .intro-text { font-size: 0.95rem; }
-      #quoteText { font-size: 1rem; }
-      .messaging-row { justify-content: center; gap: 0.9rem; }
-      .msg-btn { width: 52px; height: 52px; font-size: 1.4rem; }
-      .achievement-item { flex-direction: column; align-items: flex-start; }
+      .glitch-avatar { width: 130px; height: 130px; }
+      .glitch-avatar .dragon-icon { font-size: 5rem; }
+      .hero-roles { flex-direction: column; align-items: center; }
+      .socials { flex-direction: column; }
+      .social-btn { justify-content: center; }
+      .back-top { bottom: 1rem; right: 1rem; width: 44px; height: 44px; }
     }
 
-    ::-webkit-scrollbar { width: 8px; background: #0a0c0f; }
-    ::-webkit-scrollbar-thumb { background: #58a6ff; border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: #79c0ff; }
-    ::selection { background: #58a6ff; color: #0a0c0f; }
-    .fade-out { opacity: 0; }
-    .fade-in { opacity: 1; }
+    /* ============================================================
+       SCROLLBAR
+    ============================================================ */
+    ::-webkit-scrollbar {
+      width: 8px;
+      background: var(--darker-bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--neon-green);
+      border-radius: 10px;
+      box-shadow: 0 0 10px var(--neon-green);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--neon-cyan);
+    }
+
+    ::selection {
+      background: var(--neon-green);
+      color: var(--dark-bg);
+    }
   </style>
 </head>
 <body>
-  <div class="main-container">
-    <!-- terminal top bar -->
-    <div class="terminal-bar">
-      <div class="terminal-dots">
-        <span class="dot red"></span>
-        <span class="dot yellow"></span>
-        <span class="dot green"></span>
-      </div>
-      <div class="prompt-text">
-        <i class="fas fa-terminal"></i> root@prathyu:~$ <span>whoami</span>
-      </div>
-    </div>
 
-    <!-- ===== PROFILE ===== -->
-    <div class="profile">
-      <div class="avatar">
-        <span class="ring-pulse"></span>
-        <i class="fas fa-dragon"></i>
-      </div>
-      <div class="profile-info">
-        <h1>Prathyu Prathap <span>::</span></h1>
-        <div class="badge"><i class="fas fa-lock"></i> ETHICAL HACKER</div>
-      </div>
-    </div>
+  <!-- ============================================================
+       BOOT SCREEN
+  ============================================================ -->
+  <div class="boot-screen" id="bootScreen">
+    <div id="bootLines"></div>
+  </div>
 
-    <!-- ===== INTRO ===== -->
-    <div class="intro-section">
-      <div class="intro-terminal-header">
-        <i class="fas fa-terminal"></i>
-        <span><span class="cmd">cat</span> introduction.txt</span>
+  <!-- ============================================================
+       BACKGROUND LAYERS
+  ============================================================ -->
+  <div class="bg-grid"></div>
+  <canvas id="matrixCanvas"></canvas>
+  <div class="scanlines"></div>
+  <div class="scan-bar"></div>
+
+  <!-- Custom cursor -->
+  <div class="cursor-dot" id="cursorDot"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- Floating hacker text -->
+  <div id="floatingContainer"></div>
+
+  <!-- ============================================================
+       MAIN WRAPPER
+  ============================================================ -->
+  <div class="wrapper">
+
+    <!-- ===== NAV BAR ===== -->
+    <nav class="nav-bar">
+      <div class="nav-logo">
+        <i class="fas fa-dragon logo-mark"></i>
+        <span>PRATHYU<span style="color: var(--neon-green);">.</span>SEC</span>
       </div>
-      <p class="intro-text">
-        Hi, my name is <span class="name">Prathyu Prathap</span>. I am a 
-        <span class="role">cybersecurity specialist</span> and a 
-        <span class="role">professional penetration tester</span>. 
-        For any questions you have, you can contact me through the 
-        <span class="contact-hint">given below contact details</span>.
-        <span class="cursor"></span>
-      </p>
-    </div>
+      <ul class="nav-links">
+        <li><a href="#certs">Certs</a></li>
+        <li><a href="#quotes">Quotes</a></li>
+        <li><a href="#achievements">Achv</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+      <div class="nav-status">
+        <span class="status-dot"></span>
+        <span>ONLINE</span>
+      </div>
+    </nav>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero reveal">
+      <div class="avatar-wrap">
+        <div class="glitch-avatar">
+          <div class="orbit"></div>
+          <i class="fas fa-dragon dragon-icon"></i>
+        </div>
+      </div>
+      <h1 class="hero-name">
+        <span class="glitch-text">Prathyu Prathap</span>
+      </h1>
+      <div class="hero-tagline">// Ethical Hacker &amp; Penetration Tester</div>
+      <div class="hero-roles">
+        <div class="role-chip"><i class="fas fa-shield-hal"></i> CYBERSECURITY SPECIALIST</div>
+        <div class="role-chip"><i class="fas fa-terminal"></i> PENETRATION TESTER</div>
+        <div class="role-chip"><i class="fas fa-dragon"></i> KALI LINUX USER</div>
+      </div>
+
+      <!-- Terminal Window -->
+      <div class="terminal-window">
+        <div class="terminal-header">
+          <span class="terminal-dot red"></span>
+          <span class="terminal-dot yellow"></span>
+          <span class="terminal-dot green"></span>
+          <span class="terminal-title">root@prathyu: ~/portfolio</span>
+        </div>
+        <div class="terminal-body" id="terminalBody">
+          <!-- Typed via JS -->
+        </div>
+      </div>
+    </section>
 
     <!-- ===== CERTIFICATIONS ===== -->
-    <div class="cert-section">
-      <div class="section-title">
-        <i class="fas fa-certificate"></i> Certifications Owned
+    <section class="section reveal" id="certs">
+      <div class="section-header">
+        <h2><span class="accent">//</span> Certifications Owned</h2>
+        <div class="line"></div>
       </div>
       <div class="cert-grid">
         <div class="cert-card">
-          <i class="fas fa-shield-alt cert-icon"></i>
-          <h4>OSCP</h4>
-          <div class="cert-org">Offensive Security</div>
-          <p class="cert-desc">Offensive Security Certified Professional — hands-on penetration testing certification with a 24-hour practical exam.</p>
-          <div class="cert-meta"><i class="fas fa-calendar-check"></i> Earned 2024</div>
+          <span class="corner tl"></span><span class="corner tr"></span>
+          <span class="corner bl"></span><span class="corner br"></span>
+          <div class="cert-icon-wrap"><i class="fas fa-shield-alt"></i></div>
+          <h3>OSCP</h3>
+          <div class="org">Offensive Security</div>
+          <p class="desc">Offensive Security Certified Professional — hands-on penetration testing certification with a 24-hour practical exam.</p>
+          <div class="meta"><i class="fas fa-calendar-check"></i> Earned 2024</div>
         </div>
         <div class="cert-card">
-          <i class="fas fa-user-secret cert-icon"></i>
-          <h4>CEH</h4>
-          <div class="cert-org">EC-Council</div>
-          <p class="cert-desc">Certified Ethical Hacker — comprehensive certification covering hacking tools, techniques, and countermeasures.</p>
-          <div class="cert-meta"><i class="fas fa-calendar-check"></i> Earned 2023</div>
+          <span class="corner tl"></span><span class="corner tr"></span>
+          <span class="corner bl"></span><span class="corner br"></span>
+          <div class="cert-icon-wrap"><i class="fas fa-user-secret"></i></div>
+          <h3>CEH</h3>
+          <div class="org">EC-Council</div>
+          <p class="desc">Certified Ethical Hacker — comprehensive certification covering hacking tools, techniques, and countermeasures.</p>
+          <div class="meta"><i class="fas fa-calendar-check"></i> Earned 2023</div>
         </div>
         <div class="cert-card">
-          <i class="fas fa-network-wired cert-icon"></i>
-          <h4>CompTIA Security+</h4>
-          <div class="cert-org">CompTIA</div>
-          <p class="cert-desc">Foundational cybersecurity certification covering network security, threats, vulnerabilities, and risk management.</p>
-          <div class="cert-meta"><i class="fas fa-calendar-check"></i> Earned 2022</div>
+          <span class="corner tl"></span><span class="corner tr"></span>
+          <span class="corner bl"></span><span class="corner br"></span>
+          <div class="cert-icon-wrap"><i class="fas fa-network-wired"></i></div>
+          <h3>CompTIA Security+</h3>
+          <div class="org">CompTIA</div>
+          <p class="desc">Foundational cybersecurity certification covering network security, threats, vulnerabilities, and risk management.</p>
+          <div class="meta"><i class="fas fa-calendar-check"></i> Earned 2022</div>
         </div>
         <div class="cert-card">
-          <i class="fas fa-cloud cert-icon"></i>
-          <h4>AWS Security</h4>
-          <div class="cert-org">Amazon Web Services</div>
-          <p class="cert-desc">AWS Certified Security – Specialty — cloud security, data protection, incident response, and identity management.</p>
-          <div class="cert-meta"><i class="fas fa-calendar-check"></i> Earned 2023</div>
+          <span class="corner tl"></span><span class="corner tr"></span>
+          <span class="corner bl"></span><span class="corner br"></span>
+          <div class="cert-icon-wrap"><i class="fas fa-cloud"></i></div>
+          <h3>AWS Security</h3>
+          <div class="org">Amazon Web Services</div>
+          <p class="desc">AWS Certified Security – Specialty — cloud security, data protection, incident response, and identity management.</p>
+          <div class="meta"><i class="fas fa-calendar-check"></i> Earned 2023</div>
         </div>
         <div class="cert-card">
-          <i class="fas fa-bug cert-icon"></i>
-          <h4>eJPT</h4>
-          <div class="cert-org">INE Security</div>
-          <p class="cert-desc">eLearnSecurity Junior Penetration Tester — practical entry-level penetration testing certification.</p>
-          <div class="cert-meta"><i class="fas fa-calendar-check"></i> Earned 2022</div>
+          <span class="corner tl"></span><span class="corner tr"></span>
+          <span class="corner bl"></span><span class="corner br"></span>
+          <div class="cert-icon-wrap"><i class="fas fa-bug"></i></div>
+          <h3>eJPT</h3>
+          <div class="org">INE Security</div>
+          <p class="desc">eLearnSecurity Junior Penetration Tester — practical entry-level penetration testing certification.</p>
+          <div class="meta"><i class="fas fa-calendar-check"></i> Earned 2022</div>
         </div>
         <div class="cert-card">
-          <i class="fas fa-dragon cert-icon"></i>
-          <h4>Kali Linux Certified</h4>
-          <div class="cert-org">Offensive Security</div>
-          <p class="cert-desc">Kali Linux Professional — proficiency in the Kali Linux distribution and its penetration testing toolset.</p>
-          <div class="cert-meta"><i class="fas fa-calendar-check"></i> Earned 2023</div>
+          <span class="corner tl"></span><span class="corner tr"></span>
+          <span class="corner bl"></span><span class="corner br"></span>
+          <div class="cert-icon-wrap"><i class="fas fa-dragon"></i></div>
+          <h3>Kali Linux Certified</h3>
+          <div class="org">Offensive Security</div>
+          <p class="desc">Kali Linux Professional — proficiency in the Kali Linux distribution and its penetration testing toolset.</p>
+          <div class="meta"><i class="fas fa-calendar-check"></i> Earned 2023</div>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- ===== QUOTES ===== -->
-    <div class="quotes-section">
-      <i class="fas fa-quote-left quote-icon"></i>
-      <div id="quoteText">More Secure, More Care</div>
-      <div class="quote-author" id="quoteAuthor">Prathyu Prathap</div>
-      <div class="quote-dots">
-        <span class="quote-dot active" data-index="0"></span>
-        <span class="quote-dot" data-index="1"></span>
-        <span class="quote-dot" data-index="2"></span>
-        <span class="quote-dot" data-index="3"></span>
-        <span class="quote-dot" data-index="4"></span>
+    <section class="section reveal" id="quotes">
+      <div class="section-header">
+        <h2><span class="accent">//</span> Security Philosophy</h2>
+        <div class="line"></div>
       </div>
-    </div>
+      <div class="quotes-terminal">
+        <div class="quotes-header">
+          <div class="prompt-line">
+            <span class="ps1">root@prathyu:~$</span>
+            <span class="cmd">cat /etc/philosophy.conf</span>
+          </div>
+          <span>auto-refresh: 5s</span>
+        </div>
+        <div class="quotes-body">
+          <div id="quoteText">More Secure, More Care</div>
+          <div id="quoteAuthor">Prathyu Prathap</div>
+        </div>
+        <div class="quote-dots" id="quoteDots">
+          <span class="quote-dot active" data-index="0"></span>
+          <span class="quote-dot" data-index="1"></span>
+          <span class="quote-dot" data-index="2"></span>
+          <span class="quote-dot" data-index="3"></span>
+          <span class="quote-dot" data-index="4"></span>
+        </div>
+      </div>
+    </section>
 
     <!-- ===== ACHIEVEMENTS ===== -->
-    <div class="achievements-section">
-      <div class="section-title">
-        <i class="fas fa-trophy"></i> Achievements
+    <section class="section reveal" id="achievements">
+      <div class="section-header">
+        <h2><span class="accent">//</span> Achievements</h2>
+        <div class="line"></div>
       </div>
       <div class="achievements-list">
-        <div class="achievement-item">
-          <div class="achievement-icon"><i class="fas fa-trophy"></i></div>
-          <div class="achievement-content">
+        <div class="achievement">
+          <div class="ach-icon"><i class="fas fa-trophy"></i></div>
+          <div class="ach-body">
             <h4>Top 1% on TryHackMe</h4>
             <p>Ranked in the top 1% of all TryHackMe users globally, completing over 200 rooms and earning the "God of War" badge.</p>
-            <span class="achievement-tag">GLOBAL RANKING</span>
+            <span class="ach-tag">GLOBAL RANKING</span>
           </div>
         </div>
-        <div class="achievement-item">
-          <div class="achievement-icon"><i class="fas fa-bug"></i></div>
-          <div class="achievement-content">
+        <div class="achievement">
+          <div class="ach-icon"><i class="fas fa-bug"></i></div>
+          <div class="ach-body">
             <h4>Critical CVE Discovery</h4>
             <p>Discovered and responsibly disclosed CVE-2024-XXXX, a critical RCE vulnerability in a widely-used enterprise CMS affecting 50,000+ sites.</p>
-            <span class="achievement-tag">CVE ASSIGNED</span>
+            <span class="ach-tag">CVE ASSIGNED</span>
           </div>
         </div>
-        <div class="achievement-item">
-          <div class="achievement-icon"><i class="fas fa-medal"></i></div>
-          <div class="achievement-content">
+        <div class="achievement">
+          <div class="ach-icon"><i class="fas fa-medal"></i></div>
+          <div class="ach-body">
             <h4>Bug Bounty Hall of Fame</h4>
             <p>Recognized in the Hall of Fame of a Fortune 500 company for identifying a chain of vulnerabilities leading to full domain compromise.</p>
-            <span class="achievement-tag">HALL OF FAME</span>
+            <span class="ach-tag">HALL OF FAME</span>
           </div>
         </div>
-        <div class="achievement-item">
-          <div class="achievement-icon"><i class="fas fa-flag"></i></div>
-          <div class="achievement-content">
+        <div class="achievement">
+          <div class="ach-icon"><i class="fas fa-flag"></i></div>
+          <div class="ach-body">
             <h4>CTF Competition Winner</h4>
             <p>First place in the National Cyber Security CTF 2024, competing against 500+ teams in a 48-hour capture-the-flag challenge.</p>
-            <span class="achievement-tag">1ST PLACE</span>
+            <span class="ach-tag">1ST PLACE</span>
           </div>
         </div>
-        <div class="achievement-item">
-          <div class="achievement-icon"><i class="fas fa-chalkboard-teacher"></i></div>
-          <div class="achievement-content">
+        <div class="achievement">
+          <div class="ach-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+          <div class="ach-body">
             <h4>Security Conference Speaker</h4>
             <p>Delivered a talk on "Advanced Phishing Techniques & Countermeasures" at a regional cybersecurity conference attended by 300+ professionals.</p>
-            <span class="achievement-tag">SPEAKER</span>
+            <span class="ach-tag">SPEAKER</span>
           </div>
         </div>
-        <div class="achievement-item">
-          <div class="achievement-icon"><i class="fas fa-book"></i></div>
-          <div class="achievement-content">
+        <div class="achievement">
+          <div class="ach-icon"><i class="fas fa-book"></i></div>
+          <div class="ach-body">
             <h4>Open-Source Contributor</h4>
             <p>Contributed 15+ security patches to popular open-source projects, including Metasploit modules and Nmap scripts.</p>
-            <span class="achievement-tag">OPEN SOURCE</span>
+            <span class="ach-tag">OPEN SOURCE</span>
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- ===== STATS ===== -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <i class="fas fa-bug"></i>
-        <h3>250+</h3>
-        <p>Vulnerabilities Found</p>
+    <section class="section reveal">
+      <div class="section-header">
+        <h2><span class="accent">//</span> By The Numbers</h2>
+        <div class="line"></div>
       </div>
-      <div class="stat-card">
-        <i class="fas fa-trophy"></i>
-        <h3>15+</h3>
-        <p>Bug Bounties</p>
+      <div class="stats-grid">
+        <div class="stat-box">
+          <i class="fas fa-bug"></i>
+          <div class="stat-num" data-target="250">0</div>
+          <div class="stat-label">Vulnerabilities</div>
+        </div>
+        <div class="stat-box">
+          <i class="fas fa-trophy"></i>
+          <div class="stat-num" data-target="15">0</div>
+          <div class="stat-label">Bug Bounties</div>
+        </div>
+        <div class="stat-box">
+          <i class="fas fa-certificate"></i>
+          <div class="stat-num" data-target="6">0</div>
+          <div class="stat-label">Certifications</div>
+        </div>
+        <div class="stat-box">
+          <i class="fas fa-code-branch"></i>
+          <div class="stat-num" data-target="40">0</div>
+          <div class="stat-label">CTF Challenges</div>
+        </div>
       </div>
-      <div class="stat-card">
-        <i class="fas fa-certificate"></i>
-        <h3>6+</h3>
-        <p>Certifications</p>
-      </div>
-      <div class="stat-card">
-        <i class="fas fa-code-branch"></i>
-        <h3>40+</h3>
-        <p>CTF Challenges</p>
-      </div>
-    </div>
+    </section>
 
     <!-- ===== SKILLS ===== -->
-    <div class="section-title">
-      <i class="fas fa-tools"></i> Arsenal &amp; Expertise
-    </div>
-    <div class="skills-container">
-      <div class="skill-tag"><i class="fas fa-network-wired"></i> Penetration Testing</div>
-      <div class="skill-tag"><i class="fas fa-shield-alt"></i> Web App Security</div>
-      <div class="skill-tag"><i class="fas fa-terminal"></i> Metasploit</div>
-      <div class="skill-tag"><i class="fas fa-wifi"></i> Network Hacking</div>
-      <div class="skill-tag"><i class="fas fa-lock"></i> Cryptography</div>
-      <div class="skill-tag"><i class="fas fa-code"></i> Python / Bash</div>
-      <div class="skill-tag"><i class="fas fa-database"></i> SQL Injection</div>
-      <div class="skill-tag"><i class="fas fa-cloud"></i> Cloud Security</div>
-      <div class="skill-tag"><i class="fas fa-fish"></i> Phishing Simulation</div>
-      <div class="skill-tag"><i class="fas fa-search"></i> OSINT</div>
-    </div>
+    <section class="section reveal" id="skills">
+      <div class="section-header">
+        <h2><span class="accent">//</span> Arsenal &amp; Expertise</h2>
+        <div class="line"></div>
+      </div>
+      <div class="skills-grid">
+        <div class="skill-item"><i class="fas fa-network-wired"></i><span>Penetration Testing</span></div>
+        <div class="skill-item"><i class="fas fa-shield-alt"></i><span>Web App Security</span></div>
+        <div class="skill-item"><i class="fas fa-terminal"></i><span>Metasploit</span></div>
+        <div class="skill-item"><i class="fas fa-wifi"></i><span>Network Hacking</span></div>
+        <div class="skill-item"><i class="fas fa-lock"></i><span>Cryptography</span></div>
+        <div class="skill-item"><i class="fas fa-code"></i><span>Python / Bash</span></div>
+        <div class="skill-item"><i class="fas fa-database"></i><span>SQL Injection</span></div>
+        <div class="skill-item"><i class="fas fa-cloud"></i><span>Cloud Security</span></div>
+        <div class="skill-item"><i class="fas fa-fish"></i><span>Phishing Simulation</span></div>
+        <div class="skill-item"><i class="fas fa-search"></i><span>OSINT</span></div>
+        <div class="skill-item"><i class="fas fa-user-secret"></i><span>Red Teaming</span></div>
+        <div class="skill-item"><i class="fas fa-bug"></i><span>Bug Bounty Hunting</span></div>
+      </div>
+    </section>
 
     <!-- ===== PROJECTS ===== -->
-    <div class="section-title">
-      <i class="fas fa-folder-open"></i> Projects
-    </div>
-    <div class="projects-grid">
-      <div class="project-card">
-        <i class="fas fa-bug"></i>
-        <h3>VulnScout</h3>
-        <p>Automated vulnerability scanner with custom fuzzing engine. Discovered 12 zero-days in open-source CMS.</p>
-        <span class="tag">Python · Burp Suite</span>
+    <section class="section reveal" id="projects">
+      <div class="section-header">
+        <h2><span class="accent">//</span> Featured Projects</h2>
+        <div class="line"></div>
       </div>
-      <div class="project-card">
-        <i class="fas fa-wifi"></i>
-        <h3>Wi-Fi Pentest Toolkit</h3>
-        <p>Custom scripts for auditing wireless networks, including PMKID capture and evil twin detection.</p>
-        <span class="tag">Bash · Aircrack-ng</span>
+      <div class="projects-grid">
+        <div class="project-card">
+          <div class="project-num">01</div>
+          <i class="fas fa-bug project-icon"></i>
+          <h3>VulnScout</h3>
+          <p>Automated vulnerability scanner with custom fuzzing engine. Discovered 12 zero-days in open-source CMS platforms.</p>
+          <div class="project-tags">
+            <span class="project-tag">Python</span>
+            <span class="project-tag">Burp Suite</span>
+            <span class="project-tag">Fuzzing</span>
+          </div>
+        </div>
+        <div class="project-card">
+          <div class="project-num">02</div>
+          <i class="fas fa-wifi project-icon"></i>
+          <h3>Wi-Fi Pentest Toolkit</h3>
+          <p>Custom scripts for auditing wireless networks, including PMKID capture, handshake cracking, and evil twin detection.</p>
+          <div class="project-tags">
+            <span class="project-tag">Bash</span>
+            <span class="project-tag">Aircrack-ng</span>
+            <span class="project-tag">WPA3</span>
+          </div>
+        </div>
+        <div class="project-card">
+          <div class="project-num">03</div>
+          <i class="fas fa-shield-hal project-icon"></i>
+          <h3>Bug Bounty — Fortune 500</h3>
+          <p>Identified critical SSRF and RCE vulnerabilities in a major enterprise platform, acknowledged in Hall of Fame.</p>
+          <div class="project-tags">
+            <span class="project-tag">HackerOne</span>
+            <span class="project-tag">SSRF</span>
+            <span class="project-tag">RCE</span>
+          </div>
+        </div>
       </div>
-      <div class="project-card">
-        <i class="fas fa-shield-hal"></i>
-        <h3>Bug Bounty — Fortune 500</h3>
-        <p>Identified critical SSRF and RCE vulnerabilities, acknowledged in Hall of Fame.</p>
-        <span class="tag">HackerOne</span>
-      </div>
-    </div>
+    </section>
 
     <!-- ===== CONTACT ===== -->
-    <div class="contact-section">
+    <section class="section reveal" id="contact">
+      <div class="section-header">
+        <h2><span class="accent">//</span> Get In Touch</h2>
+        <div class="line"></div>
+      </div>
+
       <div class="contact-grid">
-        <div class="contact-item">
-          <i class="fas fa-envelope"></i>
-          <a href="mailto:prathyukpk@gmail.com">prathyukpk@gmail.com</a>
+        <a href="mailto:prathyukpk@gmail.com" class="contact-card">
+          <div class="contact-icon green"><i class="fas fa-envelope"></i></div>
+          <div class="contact-info">
+            <div class="label">Email</div>
+            <div class="value">prathyukpk@gmail.com</div>
+          </div>
+        </a>
+        <div class="contact-card">
+          <div class="contact-icon cyan"><i class="fas fa-key"></i></div>
+          <div class="contact-info">
+            <div class="label">PGP Key</div>
+            <div class="value">0x39FF14</div>
+          </div>
         </div>
-        <div class="contact-item">
-          <i class="fas fa-key"></i>
-          <span>PGP: 0x39FF14</span>
+        <div class="contact-card">
+          <div class="contact-icon yellow"><i class="fas fa-fingerprint"></i></div>
+          <div class="contact-info">
+            <div class="label">Encryption</div>
+            <div class="value">Preferred &amp; Encouraged</div>
+          </div>
         </div>
       </div>
 
-      <div class="messaging-row">
-        <a href="https://wa.me/919999999999?text=Hi%20Prathyu%2C%20I%20found%20your%20portfolio%20and%20would%20like%20to%20connect." 
-           class="msg-btn whatsapp-btn" target="_blank" rel="noopener noreferrer" 
-           data-label="WhatsApp" aria-label="Contact via WhatsApp">
-          <i class="fab fa-whatsapp"></i>
+      <div class="socials">
+        <a href="https://wa.me/919999999999?text=Hi%20Prathyu%2C%20I%20found%20your%20portfolio" target="_blank" rel="noopener" class="social-btn whatsapp">
+          <i class="fab fa-whatsapp"></i> WhatsApp
         </a>
-        <a href="https://t.me/prathyu" 
-           class="msg-btn telegram-btn" target="_blank" rel="noopener noreferrer" 
-           data-label="Telegram" aria-label="Contact via Telegram">
-          <i class="fab fa-telegram-plane"></i>
+        <a href="https://t.me/prathyu" target="_blank" rel="noopener" class="social-btn telegram">
+          <i class="fab fa-telegram-plane"></i> Telegram
         </a>
-        <a href="https://tryhackme.com/p/prathyu" 
-           class="msg-btn tryhackme-btn" target="_blank" rel="noopener noreferrer" 
-           data-label="TryHackMe" aria-label="TryHackMe Profile">
-          <i class="fas fa-user-secret"></i>
+        <a href="https://tryhackme.com/p/prathyu" target="_blank" rel="noopener" class="social-btn tryhackme">
+          <i class="fas fa-user-secret"></i> TryHackMe
+        </a>
+        <a href="https://github.com/prathyuprathap" target="_blank" rel="noopener" class="social-btn github">
+          <i class="fab fa-github"></i> GitHub
         </a>
       </div>
+    </section>
 
-      <div class="contact-footer">
-        <div class="pgp">
-          <i class="fas fa-fingerprint"></i> encrypted communication preferred
-        </div>
-        <div class="copyright">
-          <i class="fas fa-skull"></i> Prathyu Prathap · ethical hacker · © 2025
-        </div>
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+      <div class="ascii">
+   ╔══════════════════════════════════════╗
+   ║  [ ACCESS GRANTED ]  //  SYSTEM OK  ║
+   ╚══════════════════════════════════════╝
       </div>
-    </div>
+      <div class="copy">
+        <i class="fas fa-skull"></i> Prathyu Prathap · Ethical Hacker · © 2025
+      </div>
+      <div class="copy" style="margin-top: 0.5rem; opacity: 0.6;">
+        "More Secure, More Care"
+      </div>
+    </footer>
+
   </div>
 
-  <!-- ===== SCRIPTS ===== -->
+  <!-- Back to top -->
+  <div class="back-top" id="backTop">
+    <i class="fas fa-chevron-up"></i>
+  </div>
+
+  <!-- ============================================================
+       JAVASCRIPT
+  ============================================================ -->
   <script>
     (function() {
+      'use strict';
+
+      /* ==========================================================
+         BOOT SCREEN
+      ========================================================== */
+      const bootLines = [
+        { text: '[  OK  ] Loading kernel modules...', cls: 'ok', delay: 100 },
+        { text: '[  OK  ] Mounting /dev/portfolio...', cls: 'ok', delay: 250 },
+        { text: '[  OK  ] Initializing security protocols...', cls: 'ok', delay: 250 },
+        { text: '[ WARN ] Anonymizing traffic via Tor...', cls: 'warn', delay: 250 },
+        { text: '[  OK  ] Encrypting connection (AES-256)...', cls: 'ok', delay: 250 },
+        { text: '[  OK  ] Loading hacker profile: Prathyu Prathap', cls: 'ok', delay: 300 },
+        { text: '[  OK  ] Verifying certifications... 6 found', cls: 'ok', delay: 250 },
+        { text: '[  OK  ] Access level: ROOT', cls: 'ok', delay: 250 },
+        { text: '', cls: '', delay: 200 },
+        { text: '> Welcome to the terminal, visitor.', cls: 'success', delay: 350 },
+        { text: '> Initializing portfolio...', cls: 'success', delay: 300 },
+      ];
+
+      const bootScreen = document.getElementById('bootScreen');
+      const bootContainer = document.getElementById('bootLines');
+      let bootIndex = 0;
+
+      function typeBootLine() {
+        if (bootIndex >= bootLines.length) {
+          setTimeout(() => {
+            bootScreen.classList.add('hidden');
+            startTerminalTyping();
+          }, 600);
+          return;
+        }
+
+        const line = bootLines[bootIndex];
+        const el = document.createElement('div');
+        el.className = 'boot-line';
+        el.innerHTML = line.text ? `<span class="${line.cls}">${line.text}</span>` : '&nbsp;';
+        bootContainer.appendChild(el);
+
+        bootIndex++;
+        setTimeout(typeBootLine, line.delay);
+      }
+
+      setTimeout(typeBootLine, 300);
+
+      /* ==========================================================
+         HERO TERMINAL TYPEWRITER
+      ========================================================== */
+      const terminalLines = [
+        { html: '<span class="prompt">root@prathyu:~$</span> <span class="cmd">whoami</span>', delay: 400 },
+        { html: '<span class="output">Prathyu Prathap — Ethical Hacker</span>', delay: 300 },
+        { html: '', delay: 200 },
+        { html: '<span class="prompt">root@prathyu:~$</span> <span class="cmd">cat skills.txt</span>', delay: 400 },
+        { html: '<span class="output"><span class="highlight-green">✔</span> Penetration Testing &amp; Red Teaming</span>', delay: 200 },
+        { html: '<span class="output"><span class="highlight-green">✔</span> Web Application Security</span>', delay: 200 },
+        { html: '<span class="output"><span class="highlight-green">✔</span> Network &amp; Cloud Security</span>', delay: 200 },
+        { html: '<span class="output"><span class="highlight-green">✔</span> Malware Analysis &amp; OSINT</span>', delay: 200 },
+        { html: '', delay: 200 },
+        { html: '<span class="prompt">root@prathyu:~$</span> <span class="cmd">echo $PHILOSOPHY</span>', delay: 400 },
+        { html: '<span class="output highlight-cyan">"More Secure, More Care"</span>', delay: 300 },
+        { html: '', delay: 200 },
+        { html: '<span class="prompt">root@prathyu:~$</span> <span class="cmd">sudo contact --me</span>', delay: 400 },
+        { html: '<span class="output highlight-yellow">→ Scroll down to connect securely</span> <span class="typing-cursor"></span>', delay: 400 },
+      ];
+
+      function startTerminalTyping() {
+        const body = document.getElementById('terminalBody');
+        let i = 0;
+
+        function next() {
+          if (i >= terminalLines.length) return;
+          const line = terminalLines[i];
+          const el = document.createElement('div');
+          el.className = 'line';
+          el.innerHTML = line.html || '&nbsp;';
+          body.appendChild(el);
+          i++;
+          setTimeout(next, line.delay);
+        }
+
+        next();
+      }
+
+      /* ==========================================================
+         QUOTES CAROUSEL
+      ========================================================== */
       const quotes = [
-        { text: "More Secure, More Care", author: "Prathyu Prathap" },
-        { text: "Security is not a product, but a <span class='highlight'>process</span>.", author: "Bruce Schneier" },
-        { text: "The only truly secure system is one that is powered off.", author: "Gene Spafford" },
-        { text: "Hack the planet — but <span class='highlight'>ethically</span>.", author: "Prathyu Prathap" },
-        { text: "There are two types of companies: those that have been hacked, and those that <span class='highlight'>will be</span>.", author: "Robert Mueller" }
+        { text: 'More Secure, More Care', author: 'Prathyu Prathap' },
+        { text: 'Security is not a product, but a <span class="highlight">process</span>.', author: 'Bruce Schneier' },
+        { text: 'The only truly secure system is one that is powered off.', author: 'Gene Spafford' },
+        { text: 'Hack the planet — but <span class="highlight">ethically</span>.', author: 'Prathyu Prathap' },
+        { text: 'There are two types of companies: those that have been hacked, and those that <span class="highlight">will be</span>.', author: 'Robert Mueller' }
       ];
 
       const quoteText = document.getElementById('quoteText');
       const quoteAuthor = document.getElementById('quoteAuthor');
       const dots = document.querySelectorAll('.quote-dot');
-      let currentIndex = 0;
-      let intervalId = null;
+      let currentQuote = 0;
+      let quoteInterval;
 
       function showQuote(index) {
-        quoteText.classList.add('fade-out');
-        quoteAuthor.classList.add('fade-out');
+        quoteText.style.opacity = '0';
+        quoteText.style.transform = 'translateY(-10px)';
+        quoteAuthor.style.opacity = '0';
 
         setTimeout(() => {
           quoteText.innerHTML = quotes[index].text;
           quoteAuthor.textContent = quotes[index].author;
-          quoteText.classList.remove('fade-out');
-          quoteAuthor.classList.remove('fade-out');
+          quoteText.style.opacity = '1';
+          quoteText.style.transform = 'translateY(0)';
+          quoteAuthor.style.opacity = '1';
         }, 300);
 
-        dots.forEach((dot, i) => {
-          dot.classList.toggle('active', i === index);
-        });
-
-        currentIndex = index;
+        dots.forEach((d, i) => d.classList.toggle('active', i === index));
+        currentQuote = index;
       }
 
       function nextQuote() {
-        const next = (currentIndex + 1) % quotes.length;
-        showQuote(next);
+        showQuote((currentQuote + 1) % quotes.length);
       }
 
-      function startRotation() {
-        if (intervalId) clearInterval(intervalId);
-        intervalId = setInterval(nextQuote, 5000);
+      function startQuotes() {
+        clearInterval(quoteInterval);
+        quoteInterval = setInterval(nextQuote, 5000);
       }
 
       dots.forEach((dot, i) => {
         dot.addEventListener('click', () => {
           showQuote(i);
-          startRotation();
+          startQuotes();
         });
       });
 
       showQuote(0);
-      startRotation();
+      startQuotes();
 
-      console.log("%c🔒 Prathyu Prathap | Ethical Hacker 🔒", "color: #58a6ff; font-size: 16px; font-weight: bold; background: #0a0c0f; padding: 4px 12px; border-radius: 20px; border: 1px solid #58a6ff;");
-      console.log("%c> prathyukpk@gmail.com", "color: #58a6ff; font-family: monospace;");
-      console.log("%c> WhatsApp: +91 99999 99999", "color: #25D366; font-family: monospace;");
-      console.log("%c> Telegram: @prathyu", "color: #26A5E4; font-family: monospace;");
-      console.log("%c> TryHackMe: tryhackme.com/p/prathyu", "color: #ff3e3e; font-family: monospace;");
-      console.log("%c> Kali Linux user 🐉", "color: #58a6ff; font-family: monospace;");
-      console.log("%c> \"More Secure, More Care\"", "color: #58a6ff; font-style: italic; font-family: monospace;");
-      console.log("%c> Certifications: OSCP, CEH, Security+, AWS Security, eJPT, Kali Linux", "color: #79c0ff; font-family: monospace;");
-      console.log("%c> Achievements: Top 1% TryHackMe, CVE Discovery, CTF Winner", "color: #ffd700; font-family: monospace;");
+      /* ==========================================================
+         STATS COUNTER
+      ========================================================== */
+      function animateCounter(el) {
+        const target = parseInt(el.dataset.target, 10);
+        const duration = 1800;
+        const startTime = performance.now();
+
+        function update(now) {
+          const progress = Math.min((now - startTime) / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          el.textContent = Math.floor(eased * target) + (progress === 1 ? '+' : '');
+          if (progress < 1) requestAnimationFrame(update);
+        }
+
+        requestAnimationFrame(update);
+      }
+
+      /* ==========================================================
+         SCROLL REVEAL + COUNTER TRIGGER
+      ========================================================== */
+      const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+
+            // Trigger stat counters
+            entry.target.querySelectorAll('.stat-num').forEach(num => {
+              if (!num.dataset.animated) {
+                num.dataset.animated = 'true';
+                animateCounter(num);
+              }
+            });
+
+            revealObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15 });
+
+      document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+      /* ==========================================================
+         MATRIX RAIN
+      ========================================================== */
+      const canvas = document.getElementById('matrixCanvas');
+      const ctx = canvas.getContext('2d');
+
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+
+      const matrixChars = 'アカサタナハマヤラワ0123456789ABCDEF@#$%^&*';
+      const fontSize = 14;
+      let columns = Math.floor(canvas.width / fontSize);
+      let drops = Array(columns).fill(1);
+
+      function drawMatrix() {
+        ctx.fillStyle = 'rgba(5, 6, 8, 0.08)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = '#00ff41';
+        ctx.font = fontSize + 'px monospace';
+
+        for (let i = 0; i < drops.length; i++) {
+          const text = matrixChars.charAt(Math.floor(Math.random() * matrixChars.length));
+          ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+          if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+          }
+          drops[i]++;
+        }
+      }
+
+      setInterval(drawMatrix, 60);
+
+      /* ==========================================================
+         CUSTOM CURSOR
+      ========================================================== */
+      const cursorDot = document.getElementById('cursorDot');
+      const cursorRing = document.getElementById('cursorRing');
+      let mouseX = 0, mouseY = 0;
+      let ringX = 0, ringY = 0;
+
+      document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        cursorDot.style.left = mouseX - 4 + 'px';
+        cursorDot.style.top = mouseY - 4 + 'px';
+      });
+
+      function animateRing() {
+        ringX += (mouseX - ringX) * 0.15;
+        ringY += (mouseY - ringY) * 0.15;
+        cursorRing.style.left = ringX - 20 + 'px';
+        cursorRing.style.top = ringY - 20 + 'px';
+        requestAnimationFrame(animateRing);
+      }
+      animateRing();
+
+      // Hover effect
+      document.querySelectorAll('a, button, .cert-card, .achievement, .project-card, .skill-item, .stat-box, .contact-card, .quote-dot, .role-chip').forEach(el => {
+        el.addEventListener('mouseenter', () => cursorRing.classList.add('hovering'));
+        el.addEventListener('mouseleave', () => cursorRing.classList.remove('hovering'));
+      });
+
+      /* ==========================================================
+         FLOATING HACKER TEXT
+      ========================================================== */
+      const floatingTexts = [
+        'nmap -sS 192.168.1.1',
+        'sqlmap --dbs',
+        'metasploit > use exploit',
+        'hydra -l admin -P rockyou.txt',
+        'wireshark capture',
+        'burpsuite intercept',
+        'aircrack-ng wlan0',
+        'john --wordlist=rockyou',
+        'hashcat -m 1000',
+        'msfvenom payload',
+        'gobuster dir -u',
+        'nikto -h target',
+        'CVE-2024-XXXX',
+        'root@prathyu:~#',
+        'ACCESS GRANTED',
+        'SYSTEM SECURED',
+      ];
+
+      const floatingContainer = document.getElementById('floatingContainer');
+
+      function spawnFloatingText() {
+        const el = document.createElement('div');
+        el.className = 'floating-text';
+        el.textContent = floatingTexts[Math.floor(Math.random() * floatingTexts.length)];
+        el.style.left = Math.random() * 100 + 'vw';
+        el.style.animationDuration = (12 + Math.random() * 10) + 's';
+        el.style.fontSize = (0.6 + Math.random() * 0.4) + 'rem';
+        floatingContainer.appendChild(el);
+
+        setTimeout(() => el.remove(), 22000);
+      }
+
+      setInterval(spawnFloatingText, 2500);
+      for (let i = 0; i < 3; i++) setTimeout(spawnFloatingText, i * 800);
+
+      /* ==========================================================
+         BACK TO TOP
+      ========================================================== */
+      const backTop = document.getElementById('backTop');
+
+      window.addEventListener('scroll', () => {
+        backTop.classList.toggle('visible', window.scrollY > 400);
+      });
+
+      backTop.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+
+      /* ==========================================================
+         SMOOTH NAV SCROLL
+      ========================================================== */
+      document.querySelectorAll('.nav-links a').forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const target = document.querySelector(link.getAttribute('href'));
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
+      });
+
+      /* ==========================================================
+         CONSOLE BRANDING
+      ========================================================== */
+      const bigBanner = `
+   ██████╗ ██████╗  █████╗ ████████╗██╗  ██╗██╗   ██╗██╗   ██╗
+   ██╔══██╗██╔══██╗██╔══██╗╚══██╔══╝██║  ██║╚██╗ ██╔╝██║   ██║
+   ██████╔╝██████╔╝███████║   ██║   ███████║ ╚████╔╝ ██║   ██║
+   ██╔═══╝ ██╔══██╗██╔══██║   ██║   ██╔══██║  ╚██╔╝  ██║   ██║
+   ██║     ██║  ██║██║  ██║   ██║   ██║  ██║   ██║   ╚██████╔╝
+   ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝   ╚═╝    ╚═════╝ 
+      `;
+      console.log('%c' + bigBanner, 'color: #00ff41; font-weight: bold;');
+      console.log('%c🔒 Prathyu Prathap | Ethical Hacker 🔒', 'color: #00ff41; font-size: 16px; font-weight: bold; background: #050608; padding: 6px 14px; border-radius: 4px; border: 1px solid #00ff41;');
+      console.log('%c> prathyukpk@gmail.com', 'color: #00f0ff; font-family: monospace;');
+      console.log('%c> WhatsApp: +91 99999 99999', 'color: #25D366; font-family: monospace;');
+      console.log('%c> Telegram: @prathyu', 'color: #26A5E4; font-family: monospace;');
+      console.log('%c> TryHackMe: tryhackme.com/p/prathyu', 'color: #ff3e3e; font-family: monospace;');
+      console.log('%c> Kali Linux user 🐉', 'color: #00ff41; font-family: monospace;');
+      console.log('%c> "More Secure, More Care"', 'color: #00ff41; font-style: italic; font-family: monospace;');
+      console.log('%c> System status: SECURED ✅', 'color: #00ff41; font-family: monospace;');
+
     })();
   </script>
 </body>
