@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prathyu Prathap · Ethical Hacker</title>
+  <!-- Font Awesome 6 (free) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Google Fonts: Fira Code, Inter, Orbitron, Poppins -->
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #0a0c0f;
+      font-family: 'Fira Code', 'Inter', monospace;
+      color: #58a6ff;
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+      background-image: 
+        radial-gradient(circle at 20% 30%, rgba(88, 166, 255, 0.05) 0%, transparent 25%),
+        radial-gradient(circle at 80% 70%, rgba(88, 166, 255, 0.03) 0%, transparent 30%),
+        repeating-linear-gradient(0deg, rgba(88, 166, 255, 0.02) 0px, rgba(88, 166, 255, 0.02) 1px, transparent 1px, transparent 4px);
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.15) 0px, rgba(0, 0, 0, 0.15) 1px, transparent 1px, transparent 3px);
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 50% 50%, rgba(88, 166, 255, 0.03), transparent 70%);
+      pointer-events: none;
+      z-index: 998;
+    }
+
+    .main-container {
+      max-width: 1200px;
+      width: 100%;
+      background: rgba(10, 15, 20, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid #1f3a5f;
+      border-radius: 24px;
+      padding: 2.5rem 2rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(88, 166, 255, 0.1) inset, 0 0 30px rgba(88, 166, 255, 0.1);
+      position: relative;
+      z-index: 10;
+      transition: box-shadow 0.2s;
+    }
+
+    .main-container:hover {
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(88, 166, 255, 0.2) inset, 0 0 40px rgba(88, 166, 255, 0.15);
+    }
+
+    .terminal-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #1f3a5f;
+    }
+
+    .terminal-dots { display: flex; gap: 0.5rem; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot.red { background: #ff5f56; }
+    .dot.yellow { background: #ffbd2e; }
+    .dot.green { background: #27c93f; }
+
+    .prompt-text {
+      color: #58a6ff;
+      font-weight: 500;
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
+      background: #0d1117;
+      padding: 0.25rem 1rem;
+      border-radius: 30px;
+      border: 1px solid #1f3a5f;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .prompt-text i { color: #58a6ff; font-size: 0.8rem; }
+    .prompt-text span { color: #58a6ff; }
+
+    /* ===== PROFILE ===== */
+    .profile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .avatar {
+      width: 160px;
+      height: 160px;
+      background: #0d1117;
+      border: 2px solid #58a6ff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 35px rgba(88, 166, 255, 0.5);
+      position: relative;
+      overflow: hidden;
+      margin: 0 auto;
+      animation: avatarPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes avatarPulse {
+      0%, 100% {
+        box-shadow: 0 0 25px rgba(88, 166, 255, 0.4), 0 0 0 1px rgba(88, 166, 255, 0.3) inset;
+        border-color: #58a6ff;
+      }
+      50% {
+        box-shadow: 0 0 50px rgba(88, 166, 255, 0.8), 0 0 0 1px rgba(88, 166, 255, 0.5) inset;
+        border-color: #79c0ff;
+      }
+    }
+
+    .avatar i {
+      font-size: 6.5rem;
+      color: #58a6ff;
+      text-shadow: 0 0 20px #58a6ff, 0 0 40px rgba(88, 166, 255, 0.7);
+      position: relative;
+      z-index: 2;
+      animation: dragonFloat 2.5s ease-in-out infinite, dragonGlow 1.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes dragonFloat {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-6px) scale(1.05); }
+    }
+
+    @keyframes dragonGlow {
+      0% {
+        text-shadow: 0 0 15px #58a6ff, 0 0 30px rgba(88, 166, 255, 0.5);
+        color: #58a6ff;
+      }
+      100% {
+        text-shadow: 0 0 30px #58a6ff, 0 0 60px rgba(88, 166, 255, 0.9), 0 0 80px rgba(88, 166, 255, 0.5);
+        color: #79c0ff;
+      }
+    }
+
+    .avatar:hover i { animation-play-state: paused; transform: scale(1.1); }
+
+    .avatar::after {
+      content: "";
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+      border: 1px dashed #58a6ff;
+      opacity: 0.5;
+      animation: spin 8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .avatar .ring-pulse {
+      position: absolute;
+      inset: 6px;
+      border-radius: 50%;
+      border: 1px solid #58a6ff;
+      opacity: 0;
+      animation: ringPulse 2s ease-out infinite;
+      z-index: 1;
+    }
+
+    @keyframes ringPulse {
+      0% { transform: scale(0.8); opacity: 0.8; }
+      100% { transform: scale(1.3); opacity: 0; }
+    }
+
+    .profile-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .profile-info h1 {
+      font-family: 'Orbitron', 'Fira Code', monospace;
+      font-size: 2.6rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #f0f6fc;
+      text-shadow: 0 0 10px rgba(88, 166, 255, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .profile-info h1 span {
+      color: #58a6ff;
+      font-weight: 400;
+      font-size: 1.8rem;
+      text-shadow: 0 0 8px #58a6ff;
+    }
+
+    .badge {
+      background: #0d1a2b;
+      color: #58a6ff;
+      padding: 0.4rem 1.2rem;
+      border-radius: 30px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      border: 1px solid #58a6ff;
+      letter-spacing: 0.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* ===== INTRO ===== */
+    .intro-section {
+      margin: 2rem 0 2.5rem;
+      padding: 1.8rem 2rem;
+      background: linear-gradient(135deg, rgba(13, 17, 23, 0.95) 0%, rgba(13, 26, 43, 0.7) 100%);
+      border: 1px solid #1f3a5f;
+      border-radius: 18px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4), inset 0 0 30px rgba(88, 166, 255, 0.05);
+    }
+
+    .intro-section::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: #58a6ff;
+      opacity: 0.9;
+    }
+
+    .intro-terminal-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 1.2rem;
+      font-size: 0.85rem;
+      color: #8b949e;
+      letter-spacing: 0.5px;
+    }
+
+    .intro-terminal-header i { color: #58a6ff; font-size: 0.9rem; }
+    .intro-terminal-header .cmd { color: #58a6ff; font-weight: 600; }
+
+    .intro-text {
+      font-family: 'Poppins', 'Inter', sans-serif;
+      font-size: 1.2rem;
+      line-height: 1.9;
+      color: #c9d1d9;
+      font-weight: 300;
+      letter-spacing: 0.4px;
+    }
+
+    .intro-text .name { color: #58a6ff; font-weight: 700; text-shadow: 0 0 10px rgba(88, 166, 255, 0.5); }
+    .intro-text .role { color: #f0f6fc; font-weight: 600; text-shadow: 0 0 8px rgba(88, 166, 255, 0.3); }
+    .intro-text .contact-hint { color: #79c0ff; border-bottom: 1px dashed #79c0ff; padding-bottom: 1px; font-weight: 500; }
+
+    .cursor {
+      display: inline-block;
+      width: 10px;
+      height: 1.1rem;
+      background: #58a6ff;
+      margin-left: 4px;
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+      box-shadow: 0 0 8px #58a6ff;
+    }
+
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* ===== SECTION TITLE ===== */
+    .section-title {
+      font-family: 'Orbitron', 'Fira Code', monospace;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #f0f6fc;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      letter-spacing: 1px;
+    }
+
+    .section-title i { color: #58a6ff; font-size: 1.6rem; }
+
+    .section-title::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, #58a6ff, transparent);
+      margin-left: 1rem;
+    }
+
+    /* ===== CERTIFICATIONS ===== */
+    .cert-section {
+      margin-bottom: 2rem;
+      padding: 1.8rem 1.8rem;
+      background: linear-gradient(135deg, rgba(13, 17, 23, 0.95) 0%, rgba(13, 26, 43, 0.7) 100%);
+      border: 1px solid #1f3a5f;
+      border-radius: 18px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4), inset 0 0 30px rgba(88, 166, 255, 0.05);
+    }
+
+    .cert-section::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, #58a6ff, transparent, #58a6ff);
+      animation: scanLine 4s linear infinite;
+    }
+
+    @keyframes scanLine {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .cert-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .cert-card {
+      background: #0d1117;
+      border: 1px solid #1f3a5f;
+      border-radius: 16px;
+      padding: 1.5rem 1.3rem;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .cert-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: #58a6ff;
+      opacity: 0.8;
+      transition: width 0.3s ease;
+    }
+
+    .cert-card:hover::before { width: 6px; box-shadow: 0 0 20px #58a6ff; }
+
+    .cert-card:hover {
+      border-color: #58a6ff;
+      box-shadow: 0 0 25px rgba(88, 166, 255, 0.25);
+      transform: translateY(-5px);
+    }
+
+    .cert-icon { font-size: 1.8rem; color: #58a6ff; text-shadow: 0 0 12px rgba(88, 166, 255, 0.6); margin-bottom: 0.2rem; }
+
+    .cert-card h4 {
+      font-family: 'Orbitron', 'Fira Code', monospace;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #f0f6fc;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.1rem;
+    }
+
+    .cert-card .cert-org { font-size: 0.85rem; color: #58a6ff; font-weight: 500; letter-spacing: 0.3px; }
+
+    .cert-card .cert-desc {
+      font-family: 'Poppins', 'Inter', sans-serif;
+      font-size: 0.85rem;
+      color: #8b949e;
+      line-height: 1.6;
+      font-weight: 300;
+      margin-top: 0.3rem;
+    }
+
+    .cert-card .cert-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: auto;
+      padding-top: 0.6rem;
+      font-size: 0.75rem;
+      color: #79c0ff;
+      letter-spacing: 0.5px;
+    }
+
+    .cert-card .cert-meta i { color: #58a6ff; font-size: 0.8rem; }
+
+    /* ===== QUOTES SECTION ===== */
+    .quotes-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 3rem;
+      padding: 1.5rem 1rem;
+      background: linear-gradient(135deg, rgba(13, 17, 23, 0.9) 0%, rgba(13, 26, 43, 0.6) 100%);
+      border: 1px solid #1f3a5f;
+      border-radius: 18px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4), inset 0 0 30px rgba(88, 166, 255, 0.05);
+    }
+
+    .quotes-section::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #58a6ff, transparent);
+      animation: scanLine 3s linear infinite;
+    }
+
+    .quote-icon {
+      font-size: 1.8rem;
+      color: #58a6ff;
+      opacity: 0.6;
+      margin-bottom: 0.25rem;
+      text-shadow: 0 0 15px rgba(88, 166, 255, 0.5);
+    }
+
+    #quoteText {
+      font-size: 1.3rem;
+      font-weight: 500;
+      color: #f0f6fc;
+      text-align: center;
+      letter-spacing: 0.5px;
+      line-height: 1.6;
+      transition: opacity 0.5s ease;
+      min-height: 2.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #quoteText .highlight {
+      color: #58a6ff;
+      text-shadow: 0 0 10px rgba(88, 166, 255, 0.6);
+      font-weight: 600;
+    }
+
+    .quote-author {
+      font-size: 0.9rem;
+      color: #8b949e;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 500;
+      transition: opacity 0.5s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .quote-author::before { content: "—"; color: #58a6ff; }
+
+    .quote-dots { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+
+    .quote-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #1f3a5f;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .quote-dot.active {
+      background: #58a6ff;
+      box-shadow: 0 0 10px #58a6ff;
+      transform: scale(1.3);
+    }
+
+    /* ===== ACHIEVEMENTS SECTION ===== */
+    .achievements-section {
+      margin-bottom: 3rem;
+      padding: 1.8rem 1.8rem;
+      background: linear-gradient(135deg, rgba(13, 17, 23, 0.95) 0%, rgba(13, 26, 43, 0.7) 100%);
+      border: 1px solid #1f3a5f;
+      border-radius: 18px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4), inset 0 0 30px rgba(88, 166, 255, 0.05);
+    }
+
+    .achievements-section::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #ffd700, transparent);
+      animation: scanLine 5s linear infinite;
+    }
+
+    .achievements-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .achievement-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.2rem;
+      padding: 1.2rem 1.3rem;
+      background: #0d1117;
+      border: 1px solid #1f3a5f;
+      border-radius: 14px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .achievement-item::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 3px;
+      height: 100%;
+      background: #ffd700;
+      opacity: 0.9;
+      transition: width 0.3s ease;
+    }
+
+    .achievement-item:hover::before { width: 5px; box-shadow: 0 0 20px #ffd700; }
+
+    .achievement-item:hover {
+      border-color: #ffd700;
+      box-shadow: 0 0 25px rgba(255, 215, 0, 0.2);
+      transform: translateX(5px);
+    }
+
+    .achievement-icon {
+      flex-shrink: 0;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(255, 215, 0, 0.1);
+      border: 1px solid rgba(255, 215, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      color: #ffd700;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+    }
+
+    .achievement-content { flex: 1; }
+
+    .achievement-content h4 {
+      font-family: 'Orbitron', 'Fira Code', monospace;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #f0f6fc;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.3rem;
+    }
+
+    .achievement-content p {
+      font-family: 'Poppins', 'Inter', sans-serif;
+      font-size: 0.9rem;
+      color: #8b949e;
+      line-height: 1.6;
+      font-weight: 300;
+    }
+
+    .achievement-content .achievement-tag {
+      display: inline-block;
+      margin-top: 0.5rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.2rem 0.7rem;
+      border-radius: 20px;
+      background: rgba(255, 215, 0, 0.1);
+      color: #ffd700;
+      border: 1px solid rgba(255, 215, 0, 0.4);
+      letter-spacing: 0.5px;
+    }
+
+    /* ===== STATS ===== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .stat-card {
+      background: #0d1117;
+      border: 1px solid #1f3a5f;
+      border-radius: 16px;
+      padding: 1.5rem 1rem;
+      text-align: center;
+      transition: all 0.2s;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+      border-top: 3px solid #58a6ff;
+    }
+
+    .stat-card i {
+      font-size: 2rem;
+      color: #58a6ff;
+      margin-bottom: 0.75rem;
+      text-shadow: 0 0 10px rgba(88, 166, 255, 0.5);
+    }
+
+    .stat-card h3 {
+      font-family: 'Orbitron', 'Fira Code', monospace;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #f0f6fc;
+      letter-spacing: -0.5px;
+    }
+
+    .stat-card p {
+      color: #8b949e;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 500;
+    }
+
+    .stat-card:hover {
+      border-color: #58a6ff;
+      box-shadow: 0 0 20px rgba(88, 166, 255, 0.2);
+      transform: translateY(-3px);
+    }
+
+    /* ===== SKILLS ===== */
+    .skills-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 3rem;
+    }
+
+    .skill-tag {
+      background: #0d1117;
+      border: 1px solid #1f3a5f;
+      border-radius: 40px;
+      padding: 0.6rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #58a6ff;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      transition: all 0.2s;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    .skill-tag i { color: #58a6ff; font-size: 1rem; }
+
+    .skill-tag:hover {
+      border-color: #58a6ff;
+      background: #111f2f;
+      color: #ffffff;
+      box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+      transform: scale(1.02);
+    }
+
+    /* ===== PROJECTS ===== */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.8rem;
+      margin-bottom: 3rem;
+    }
+
+    .project-card {
+      background: #0d1117;
+      border: 1px solid #1f3a5f;
+      border-radius: 18px;
+      padding: 1.8rem 1.5rem;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .project-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: #58a6ff;
+      opacity: 0.8;
+    }
+
+    .project-card i { font-size: 2rem; color: #58a6ff; margin-bottom: 1rem; display: block; }
+
+    .project-card h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #f0f6fc;
+      margin-bottom: 0.5rem;
+    }
+
+    .project-card p { color: #8b949e; font-size: 0.95rem; margin-bottom: 1rem; }
+
+    .project-card .tag {
+      display: inline-block;
+      background: #0d1a2b;
+      color: #58a6ff;
+      font-size: 0.75rem;
+      padding: 0.25rem 1rem;
+      border-radius: 20px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    .project-card:hover {
+      border-color: #58a6ff;
+      box-shadow: 0 0 25px rgba(88, 166, 255, 0.15);
+      transform: translateY(-5px);
+    }
+
+    /* ===== CONTACT ===== */
+    .contact-section {
+      border-top: 1px solid #1f3a5f;
+      padding-top: 2rem;
+      margin-top: 1rem;
+    }
+
+    .contact-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.1rem;
+      color: #58a6ff;
+    }
+
+    .contact-item i { color: #58a6ff; font-size: 1.4rem; width: 30px; text-align: center; }
+
+    .contact-item a {
+      color: #58a6ff;
+      text-decoration: none;
+      border-bottom: 1px dashed #58a6ff;
+      transition: color 0.2s;
+    }
+
+    .contact-item a:hover { color: #79c0ff; }
+
+    /* ===== ICON-ONLY SOCIAL BUTTONS ===== */
+    .messaging-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.2rem;
+      margin: 1.5rem 0 1rem;
+      justify-content: flex-start;
+      align-items: center;
+    }
+
+    .msg-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      font-size: 1.6rem;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      border: 1px solid transparent;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+
+    .msg-btn i { transition: transform 0.2s; }
+    .msg-btn:hover i { transform: scale(1.2); }
+
+    .msg-btn::after {
+      content: attr(data-label);
+      position: absolute;
+      bottom: -35px;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: #0d1117;
+      color: #58a6ff;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      border: 1px solid #1f3a5f;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+      font-family: 'Fira Code', monospace;
+      letter-spacing: 0.5px;
+    }
+
+    .msg-btn:hover::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .whatsapp-btn { background: #0d1117; border: 1px solid #25D366; color: #25D366; }
+    .whatsapp-btn i { color: #25D366; }
+    .whatsapp-btn:hover {
+      background: #25D366;
+      color: #0a0c0f;
+      border-color: #25D366;
+      box-shadow: 0 0 25px rgba(37, 211, 102, 0.6);
+      transform: translateY(-5px) scale(1.05);
+    }
+    .whatsapp-btn:hover i { color: #0a0c0f; }
+
+    .telegram-btn { background: #0d1117; border: 1px solid #26A5E4; color: #26A5E4; }
+    .telegram-btn i { color: #26A5E4; }
+    .telegram-btn:hover {
+      background: #26A5E4;
+      color: #0a0c0f;
+      border-color: #26A5E4;
+      box-shadow: 0 0 25px rgba(38, 165, 228, 0.6);
+      transform: translateY(-5px) scale(1.05);
+    }
+    .telegram-btn:hover i { color: #0a0c0f; }
+
+    .tryhackme-btn { background: #0d1117; border: 1px solid #ff3e3e; color: #ff3e3e; }
+    .tryhackme-btn i { color: #ff3e3e; }
+    .tryhackme-btn:hover {
+      background: #ff3e3e;
+      color: #0a0c0f;
+      border-color: #ff3e3e;
+      box-shadow: 0 0 25px rgba(255, 62, 62, 0.6);
+      transform: translateY(-5px) scale(1.05);
+    }
+    .tryhackme-btn:hover i { color: #0a0c0f; }
+
+    .contact-footer {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid #1f3a5f;
+    }
+
+    .copyright { color: #6e7681; font-size: 0.85rem; letter-spacing: 0.5px; }
+    .copyright i { color: #58a6ff; margin-right: 0.25rem; }
+
+    .pgp { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: #8b949e; }
+    .pgp i { color: #58a6ff; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 650px) {
+      .main-container { padding: 1.8rem 1.2rem; }
+      .profile-info h1 { font-size: 1.9rem; }
+      .avatar { width: 130px; height: 130px; }
+      .avatar i { font-size: 5.2rem; }
+      .intro-section { padding: 1.4rem 1.4rem; }
+      .intro-text { font-size: 1.05rem; line-height: 1.8; }
+      .cert-grid { grid-template-columns: 1fr; }
+      .achievement-item { flex-direction: row; }
+      #quoteText { font-size: 1.1rem; }
+      .contact-grid { flex-direction: column; align-items: flex-start; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .messaging-row { justify-content: center; }
+      .contact-footer { flex-direction: column; text-align: center; }
+      .msg-btn::after { display: none; }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .profile-info h1 { font-size: 1.6rem; }
+      .avatar { width: 110px; height: 110px; }
+      .avatar i { font-size: 4.4rem; }
+      .intro-text { font-size: 0.95rem; }
+      #quoteText { font-size: 1rem; }
+      .messaging-row { justify-content: center; gap: 0.9rem; }
+      .msg-btn { width: 52px; height: 52px; font-size: 1.4rem; }
+      .achievement-item { flex-direction: column; align-items: flex-start; }
+    }
+
+    ::-webkit-scrollbar { width: 8px; background: #0a0c0f; }
+    ::-webkit-scrollbar-thumb { background: #58a6ff; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #79c0ff; }
+    ::selection { background: #58a6ff; color: #0a0c0f; }
+    .fade-out { opacity: 0; }
+    .fade-in { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <!-- terminal top bar -->
+    <div class="terminal-bar">
+      <div class="terminal-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <div class="prompt-text">
+        <i class="fas fa-terminal"></i> root@prathyu:~$ <span>whoami</span>
+      </div>
+    </div>
+
+    <!-- ===== PROFILE ===== -->
+    <div class="profile">
+      <div class="avatar">
+        <span class="ring-pulse"></span>
+        <i class="fas fa-dragon"></i>
+      </div>
+      <div class="profile-info">
+        <h1>Prathyu Prathap <span>::</span></h1>
+        <div class="badge"><i class="fas fa-lock"></i> ETHICAL HACKER</div>
+      </div>
+    </div>
+
+    <!-- ===== INTRO ===== -->
+    <div class="intro-section">
+      <div class="intro-terminal-header">
+        <i class="fas fa-terminal"></i>
+        <span><span class="cmd">cat</span> introduction.txt</span>
+      </div>
+      <p class="intro-text">
+        Hi, my name is <span class="name">Prathyu Prathap</span>. I am a 
+        <span class="role">cybersecurity specialist</span> and a 
+        <span class="role">professional penetration tester</span>. 
+        For any questions you have, you can contact me through the 
+        <span class="contact-hint">given below contact details</span>.
+        <span class="cursor"></span>
+      </p>
+    </div>
+
+    <!-- ===== CERTIFICATIONS ===== -->
+    <div class="cert-section">
+      <div class="section-title">
+        <i class="fas fa-certificate"></i> Certifications Owned
+      </div>
+      <div class="cert-grid">
+        <div class="cert-card">
+          <i class="fas fa-shield-alt cert-icon"></i>
+          <h4>OSCP</h4>
+          <div class="cert-org">Offensive Security</div>
+          <p class="cert-desc">Offensive Security Certified Professional — hands-on penetration testing certification with a 24-hour practical exam.</p>
+          <div class="cert-meta"><i class="fas fa-calendar-check"></i> Earned 2024</div>
+        </div>
+        <div class="cert-card">
+          <i class="fas fa-user-secret cert-icon"></i>
+          <h4>CEH</h4>
+          <div class="cert-org">EC-Council</div>
+          <p class="cert-desc">Certified Ethical Hacker — comprehensive certification covering hacking tools, techniques, and countermeasures.</p>
+          <div class="cert-meta"><i class="fas fa-calendar-check"></i> Earned 2023</div>
+        </div>
+        <div class="cert-card">
+          <i class="fas fa-network-wired cert-icon"></i>
+          <h4>CompTIA Security+</h4>
+          <div class="cert-org">CompTIA</div>
+          <p class="cert-desc">Foundational cybersecurity certification covering network security, threats, vulnerabilities, and risk management.</p>
+          <div class="cert-meta"><i class="fas fa-calendar-check"></i> Earned 2022</div>
+        </div>
+        <div class="cert-card">
+          <i class="fas fa-cloud cert-icon"></i>
+          <h4>AWS Security</h4>
+          <div class="cert-org">Amazon Web Services</div>
+          <p class="cert-desc">AWS Certified Security – Specialty — cloud security, data protection, incident response, and identity management.</p>
+          <div class="cert-meta"><i class="fas fa-calendar-check"></i> Earned 2023</div>
+        </div>
+        <div class="cert-card">
+          <i class="fas fa-bug cert-icon"></i>
+          <h4>eJPT</h4>
+          <div class="cert-org">INE Security</div>
+          <p class="cert-desc">eLearnSecurity Junior Penetration Tester — practical entry-level penetration testing certification.</p>
+          <div class="cert-meta"><i class="fas fa-calendar-check"></i> Earned 2022</div>
+        </div>
+        <div class="cert-card">
+          <i class="fas fa-dragon cert-icon"></i>
+          <h4>Kali Linux Certified</h4>
+          <div class="cert-org">Offensive Security</div>
+          <p class="cert-desc">Kali Linux Professional — proficiency in the Kali Linux distribution and its penetration testing toolset.</p>
+          <div class="cert-meta"><i class="fas fa-calendar-check"></i> Earned 2023</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== QUOTES ===== -->
+    <div class="quotes-section">
+      <i class="fas fa-quote-left quote-icon"></i>
+      <div id="quoteText">More Secure, More Care</div>
+      <div class="quote-author" id="quoteAuthor">Prathyu Prathap</div>
+      <div class="quote-dots">
+        <span class="quote-dot active" data-index="0"></span>
+        <span class="quote-dot" data-index="1"></span>
+        <span class="quote-dot" data-index="2"></span>
+        <span class="quote-dot" data-index="3"></span>
+        <span class="quote-dot" data-index="4"></span>
+      </div>
+    </div>
+
+    <!-- ===== ACHIEVEMENTS ===== -->
+    <div class="achievements-section">
+      <div class="section-title">
+        <i class="fas fa-trophy"></i> Achievements
+      </div>
+      <div class="achievements-list">
+        <div class="achievement-item">
+          <div class="achievement-icon"><i class="fas fa-trophy"></i></div>
+          <div class="achievement-content">
+            <h4>Top 1% on TryHackMe</h4>
+            <p>Ranked in the top 1% of all TryHackMe users globally, completing over 200 rooms and earning the "God of War" badge.</p>
+            <span class="achievement-tag">GLOBAL RANKING</span>
+          </div>
+        </div>
+        <div class="achievement-item">
+          <div class="achievement-icon"><i class="fas fa-bug"></i></div>
+          <div class="achievement-content">
+            <h4>Critical CVE Discovery</h4>
+            <p>Discovered and responsibly disclosed CVE-2024-XXXX, a critical RCE vulnerability in a widely-used enterprise CMS affecting 50,000+ sites.</p>
+            <span class="achievement-tag">CVE ASSIGNED</span>
+          </div>
+        </div>
+        <div class="achievement-item">
+          <div class="achievement-icon"><i class="fas fa-medal"></i></div>
+          <div class="achievement-content">
+            <h4>Bug Bounty Hall of Fame</h4>
+            <p>Recognized in the Hall of Fame of a Fortune 500 company for identifying a chain of vulnerabilities leading to full domain compromise.</p>
+            <span class="achievement-tag">HALL OF FAME</span>
+          </div>
+        </div>
+        <div class="achievement-item">
+          <div class="achievement-icon"><i class="fas fa-flag"></i></div>
+          <div class="achievement-content">
+            <h4>CTF Competition Winner</h4>
+            <p>First place in the National Cyber Security CTF 2024, competing against 500+ teams in a 48-hour capture-the-flag challenge.</p>
+            <span class="achievement-tag">1ST PLACE</span>
+          </div>
+        </div>
+        <div class="achievement-item">
+          <div class="achievement-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+          <div class="achievement-content">
+            <h4>Security Conference Speaker</h4>
+            <p>Delivered a talk on "Advanced Phishing Techniques & Countermeasures" at a regional cybersecurity conference attended by 300+ professionals.</p>
+            <span class="achievement-tag">SPEAKER</span>
+          </div>
+        </div>
+        <div class="achievement-item">
+          <div class="achievement-icon"><i class="fas fa-book"></i></div>
+          <div class="achievement-content">
+            <h4>Open-Source Contributor</h4>
+            <p>Contributed 15+ security patches to popular open-source projects, including Metasploit modules and Nmap scripts.</p>
+            <span class="achievement-tag">OPEN SOURCE</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== STATS ===== -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <i class="fas fa-bug"></i>
+        <h3>250+</h3>
+        <p>Vulnerabilities Found</p>
+      </div>
+      <div class="stat-card">
+        <i class="fas fa-trophy"></i>
+        <h3>15+</h3>
+        <p>Bug Bounties</p>
+      </div>
+      <div class="stat-card">
+        <i class="fas fa-certificate"></i>
+        <h3>6+</h3>
+        <p>Certifications</p>
+      </div>
+      <div class="stat-card">
+        <i class="fas fa-code-branch"></i>
+        <h3>40+</h3>
+        <p>CTF Challenges</p>
+      </div>
+    </div>
+
+    <!-- ===== SKILLS ===== -->
+    <div class="section-title">
+      <i class="fas fa-tools"></i> Arsenal &amp; Expertise
+    </div>
+    <div class="skills-container">
+      <div class="skill-tag"><i class="fas fa-network-wired"></i> Penetration Testing</div>
+      <div class="skill-tag"><i class="fas fa-shield-alt"></i> Web App Security</div>
+      <div class="skill-tag"><i class="fas fa-terminal"></i> Metasploit</div>
+      <div class="skill-tag"><i class="fas fa-wifi"></i> Network Hacking</div>
+      <div class="skill-tag"><i class="fas fa-lock"></i> Cryptography</div>
+      <div class="skill-tag"><i class="fas fa-code"></i> Python / Bash</div>
+      <div class="skill-tag"><i class="fas fa-database"></i> SQL Injection</div>
+      <div class="skill-tag"><i class="fas fa-cloud"></i> Cloud Security</div>
+      <div class="skill-tag"><i class="fas fa-fish"></i> Phishing Simulation</div>
+      <div class="skill-tag"><i class="fas fa-search"></i> OSINT</div>
+    </div>
+
+    <!-- ===== PROJECTS ===== -->
+    <div class="section-title">
+      <i class="fas fa-folder-open"></i> Projects
+    </div>
+    <div class="projects-grid">
+      <div class="project-card">
+        <i class="fas fa-bug"></i>
+        <h3>VulnScout</h3>
+        <p>Automated vulnerability scanner with custom fuzzing engine. Discovered 12 zero-days in open-source CMS.</p>
+        <span class="tag">Python · Burp Suite</span>
+      </div>
+      <div class="project-card">
+        <i class="fas fa-wifi"></i>
+        <h3>Wi-Fi Pentest Toolkit</h3>
+        <p>Custom scripts for auditing wireless networks, including PMKID capture and evil twin detection.</p>
+        <span class="tag">Bash · Aircrack-ng</span>
+      </div>
+      <div class="project-card">
+        <i class="fas fa-shield-hal"></i>
+        <h3>Bug Bounty — Fortune 500</h3>
+        <p>Identified critical SSRF and RCE vulnerabilities, acknowledged in Hall of Fame.</p>
+        <span class="tag">HackerOne</span>
+      </div>
+    </div>
+
+    <!-- ===== CONTACT ===== -->
+    <div class="contact-section">
+      <div class="contact-grid">
+        <div class="contact-item">
+          <i class="fas fa-envelope"></i>
+          <a href="mailto:prathyukpk@gmail.com">prathyukpk@gmail.com</a>
+        </div>
+        <div class="contact-item">
+          <i class="fas fa-key"></i>
+          <span>PGP: 0x39FF14</span>
+        </div>
+      </div>
+
+      <div class="messaging-row">
+        <a href="https://wa.me/919999999999?text=Hi%20Prathyu%2C%20I%20found%20your%20portfolio%20and%20would%20like%20to%20connect." 
+           class="msg-btn whatsapp-btn" target="_blank" rel="noopener noreferrer" 
+           data-label="WhatsApp" aria-label="Contact via WhatsApp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+        <a href="https://t.me/prathyu" 
+           class="msg-btn telegram-btn" target="_blank" rel="noopener noreferrer" 
+           data-label="Telegram" aria-label="Contact via Telegram">
+          <i class="fab fa-telegram-plane"></i>
+        </a>
+        <a href="https://tryhackme.com/p/prathyu" 
+           class="msg-btn tryhackme-btn" target="_blank" rel="noopener noreferrer" 
+           data-label="TryHackMe" aria-label="TryHackMe Profile">
+          <i class="fas fa-user-secret"></i>
+        </a>
+      </div>
+
+      <div class="contact-footer">
+        <div class="pgp">
+          <i class="fas fa-fingerprint"></i> encrypted communication preferred
+        </div>
+        <div class="copyright">
+          <i class="fas fa-skull"></i> Prathyu Prathap · ethical hacker · © 2025
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SCRIPTS ===== -->
+  <script>
+    (function() {
+      const quotes = [
+        { text: "More Secure, More Care", author: "Prathyu Prathap" },
+        { text: "Security is not a product, but a <span class='highlight'>process</span>.", author: "Bruce Schneier" },
+        { text: "The only truly secure system is one that is powered off.", author: "Gene Spafford" },
+        { text: "Hack the planet — but <span class='highlight'>ethically</span>.", author: "Prathyu Prathap" },
+        { text: "There are two types of companies: those that have been hacked, and those that <span class='highlight'>will be</span>.", author: "Robert Mueller" }
+      ];
+
+      const quoteText = document.getElementById('quoteText');
+      const quoteAuthor = document.getElementById('quoteAuthor');
+      const dots = document.querySelectorAll('.quote-dot');
+      let currentIndex = 0;
+      let intervalId = null;
+
+      function showQuote(index) {
+        quoteText.classList.add('fade-out');
+        quoteAuthor.classList.add('fade-out');
+
+        setTimeout(() => {
+          quoteText.innerHTML = quotes[index].text;
+          quoteAuthor.textContent = quotes[index].author;
+          quoteText.classList.remove('fade-out');
+          quoteAuthor.classList.remove('fade-out');
+        }, 300);
+
+        dots.forEach((dot, i) => {
+          dot.classList.toggle('active', i === index);
+        });
+
+        currentIndex = index;
+      }
+
+      function nextQuote() {
+        const next = (currentIndex + 1) % quotes.length;
+        showQuote(next);
+      }
+
+      function startRotation() {
+        if (intervalId) clearInterval(intervalId);
+        intervalId = setInterval(nextQuote, 5000);
+      }
+
+      dots.forEach((dot, i) => {
+        dot.addEventListener('click', () => {
+          showQuote(i);
+          startRotation();
+        });
+      });
+
+      showQuote(0);
+      startRotation();
+
+      console.log("%c🔒 Prathyu Prathap | Ethical Hacker 🔒", "color: #58a6ff; font-size: 16px; font-weight: bold; background: #0a0c0f; padding: 4px 12px; border-radius: 20px; border: 1px solid #58a6ff;");
+      console.log("%c> prathyukpk@gmail.com", "color: #58a6ff; font-family: monospace;");
+      console.log("%c> WhatsApp: +91 99999 99999", "color: #25D366; font-family: monospace;");
+      console.log("%c> Telegram: @prathyu", "color: #26A5E4; font-family: monospace;");
+      console.log("%c> TryHackMe: tryhackme.com/p/prathyu", "color: #ff3e3e; font-family: monospace;");
+      console.log("%c> Kali Linux user 🐉", "color: #58a6ff; font-family: monospace;");
+      console.log("%c> \"More Secure, More Care\"", "color: #58a6ff; font-style: italic; font-family: monospace;");
+      console.log("%c> Certifications: OSCP, CEH, Security+, AWS Security, eJPT, Kali Linux", "color: #79c0ff; font-family: monospace;");
+      console.log("%c> Achievements: Top 1% TryHackMe, CVE Discovery, CTF Winner", "color: #ffd700; font-family: monospace;");
+    })();
+  </script>
+</body>
+</html>
